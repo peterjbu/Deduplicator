@@ -1,8 +1,28 @@
+import com.sun.javafx.geom.Edge;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class SuffixTree {
 
-    private ArrayList<Edge> treeEdges;
+    private ArrayList<ArrayList<Edge>> arr;
+
+    SuffixTree() {
+        this.arr = new ArrayList<>();
+        this.arr.add(new ArrayList<>());
+        this.arr.add(new ArrayList<>());
+    }
+
+    public void addEdge(Edge e) {
+
+        if(this.arr.size() < e.end) {
+            this.arr.add(e.end, new ArrayList<>());
+        }
+
+        this.arr.get(e.begin).add(e); // Adds outgoing edge
+
+    }
 
     class Edge {
 
@@ -15,17 +35,6 @@ public class SuffixTree {
             this.begin = begin;
             this.end = end;
         }
-
-    }
-
-    /**
-     * Instantiates an empty tree
-     * @param
-     * @return an instance of a SuffixTree object with a null tree
-     */
-    public SuffixTree(){
-
-        this.treeEdges = new ArrayList<>();
 
     }
 
@@ -69,66 +78,59 @@ public class SuffixTree {
         String substr;
         int endMax = 1;
 
-        this.treeEdges.add(new Edge(str.substring(stringLength-1,stringLength), 0, endMax));
+        // First start by adding the last letter in the string to the Tree
+        this.addEdge(new Edge(str.substring(stringLength-1,stringLength), 0, endMax));
 
+        // Outer loop focuses on iterating through the to get all substrings
         for(int i = stringLength-2; i >= 0; i--) {
 
             substr = str.substring(i,stringLength);
-            ArrayList<Edge> tempEdges = new ArrayList<>();
-            ArrayList<Integer> edgesToRemove = new ArrayList<>();
 
-            for(int k = 0; k < this.treeEdges.size(); k++) {
-
-                Edge edge = this.treeEdges.get(k);
-
-                int maxSimilarityIndex = longestEquivalentStartString(substr, edge.value);
-
-                if(maxSimilarityIndex > 0) {
-
-                    // We have found a match so we split
-                    String longestMatch = substr.substring(0, maxSimilarityIndex);
-                    String branchOne = substr.substring(maxSimilarityIndex, substr.length());
-                    String branchTwo = edge.value.substring(maxSimilarityIndex, edge.value.length());
-
-                    // Remove old edge and split with the new criteria
-                    tempEdges.add(new Edge(longestMatch, edge.begin, edge.end));
-                    tempEdges.add(new Edge(branchOne, edge.end, ++endMax));
-                    tempEdges.add(new Edge(branchTwo, edge.end, ++endMax));
-                    edgesToRemove.add(k);
-
-                }
-
-            }
-
-            if(tempEdges.size() == 0) {
-                this.treeEdges.add(new Edge(substr, 0, ++endMax));
-            }
-            else {
-                for (int d = 0; d < edgesToRemove.size(); d++) {
-
-                    this.treeEdges.remove(edgesToRemove.get(d));
-
-                }
-
-                this.treeEdges.addAll(tempEdges);
-                tempEdges.clear();
-            }
+            // The inner loop focuses on iterating through the existing edges to find either splits, or new edges to add
+            splitEdges(this.arr, substr, this.arr.get(0), endMax);
 
         }
 
     }
 
+    public void splitEdges(ArrayList<ArrayList<Edge>> st, String substring, ArrayList<Edge> outgoingEdges, int endMax) {
+
+        for(int i = 0; i < outgoingEdges.size(); i++) {
+
+            String edgeString = outgoingEdges.get(i).value;
+            int maximumSimilarity = longestEquivalentStartString(substring, edgeString);
+
+            if(maximumSimilarity > 0) {
+
+                if (maximumSimilarity == edgeString.length()) { // Could be further down the branch
+
+                    splitEdges(st, substring, st.get(outgoingEdges.get(i).end), endMax);
+
+                }
+                else {
+
+                    String longestMatch = substring.substring(0, maximumSimilarity);
+
+                    st.get(outgoingEdges.get(i).end).add(new Edge(substring.substring(maximumSimilarity,substring.length()), outgoingEdges.get(i).end, ++endMax));
+                    st.get(outgoingEdges.get(i).end).add(new Edge(outgoingEdges.get(i).value.substring(maximumSimilarity,outgoingEdges.get(i).value.length()), outgoingEdges.get(i).end, ++endMax));
+                    outgoingEdges.get(i).value = longestMatch;
+                    return;
+
+                }
+
+            }
+
+        }
+
+        // No Similarities were found, add edge to the root node
+        Edge e = new Edge(substring, 0, ++endMax);
+
+    }
+
     public void traverseSuffixTree() {
 
-        for(int i = 0; i < this.treeEdges.size(); i++) {
-
-            System.out.print(this.treeEdges.get(i).begin);
-            System.out.print(" ");
-            System.out.print(this.treeEdges.get(i).end);
-            System.out.print(" ");
-            System.out.print(this.treeEdges.get(i).value);
-            System.out.print("\n");
-
+        for(int i = 0; i < this.arr.size(); i++){
+            System.out.println(this.arr.get(i));
         }
 
     }
@@ -185,3 +187,4 @@ public class SuffixTree {
     }
 
 }
+
