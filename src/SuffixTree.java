@@ -1,34 +1,31 @@
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class SuffixTree {
 
-    private ArrayList<Node> tree;
+    private ArrayList<Edge> treeEdges;
 
-    class Node {
+    class Edge {
 
-        private int value;
-        private HashSet<String> edges;
+        private String value;
+        private int begin;
+        private int end;
 
-        Node(int value) {
+        Edge(String value, int begin, int end) {
             this.value = value;
-            this.edges = new HashSet<>();
-        }
-
-        void addEdge(String edge) {
-            this.edges.add(edge);
+            this.begin = begin;
+            this.end = end;
         }
 
     }
 
     /**
-     * Converts an array of strings into one concatenated string delimited with special characters to create a suffix tree
+     * Instantiates an empty tree
      * @param
      * @return an instance of a SuffixTree object with a null tree
      */
     public SuffixTree(){
 
-        this.tree = new ArrayList<>();
+        this.treeEdges = new ArrayList<>();
 
     }
 
@@ -62,37 +59,114 @@ public class SuffixTree {
     }
 
     /**
-     * Converts an array of strings into one concatenated string delimited with special characters to create a suffix tree
+     * Creates a SuffixTree from a given string or a string made from a concatenated set of strings
      * @param str is a single, continuous string
      * @return SuffixTree resulting from the str
      */
-    public Node buildTree(String str) {
+    public void buildTreeEdges(String str) {
 
         int stringLength = str.length();
         String substr;
+        int endMax = 1;
 
-        SuffixTree st = new SuffixTree();
-        tree.add(new Node(0));
+        this.treeEdges.add(new Edge(str.substring(stringLength-1,stringLength), 0, endMax));
 
-        // Loop through each character and see if it exists in the current tree, if so append character
-        for(int i = stringLength-1; i >= 0; i--) {
+        for(int i = stringLength-2; i >= 0; i--) {
 
             substr = str.substring(i,stringLength);
-            tree.get(0).addEdge(substr);
+            ArrayList<Edge> tempEdges = new ArrayList<>();
+            ArrayList<Integer> edgesToRemove = new ArrayList<>();
+
+            for(int k = 0; k < this.treeEdges.size(); k++) {
+
+                Edge edge = this.treeEdges.get(k);
+
+                int maxSimilarityIndex = longestEquivalentStartString(substr, edge.value);
+
+                if(maxSimilarityIndex > 0) {
+
+                    // We have found a match so we split
+                    String longestMatch = substr.substring(0, maxSimilarityIndex);
+                    String branchOne = substr.substring(maxSimilarityIndex, substr.length());
+                    String branchTwo = edge.value.substring(maxSimilarityIndex, edge.value.length());
+
+                    // Remove old edge and split with the new criteria
+                    tempEdges.add(new Edge(longestMatch, edge.begin, edge.end));
+                    tempEdges.add(new Edge(branchOne, edge.end, ++endMax));
+                    tempEdges.add(new Edge(branchTwo, edge.end, ++endMax));
+                    edgesToRemove.add(k);
+
+                }
+
+            }
+
+            if(tempEdges.size() == 0) {
+                this.treeEdges.add(new Edge(substr, 0, ++endMax));
+            }
+            else {
+                for (int d = 0; d < edgesToRemove.size(); d++) {
+
+                    this.treeEdges.remove(edgesToRemove.get(d));
+
+                }
+
+                this.treeEdges.addAll(tempEdges);
+                tempEdges.clear();
+            }
 
         }
-
-        return tree.get(0);
 
     }
 
-    public void traverseSuffixTree(SuffixTree st) {
+    public void traverseSuffixTree() {
 
-        for(int i = 0; i < st.tree.size(); i++) {
+        for(int i = 0; i < this.treeEdges.size(); i++) {
 
-            System.out.print(st.tree.get(i).edges);
+            System.out.print(this.treeEdges.get(i).begin);
+            System.out.print(" ");
+            System.out.print(this.treeEdges.get(i).end);
+            System.out.print(" ");
+            System.out.print(this.treeEdges.get(i).value);
+            System.out.print("\n");
 
         }
+
+    }
+
+    public static int longestEquivalentStartString(String one, String two) {
+
+        int oneLen = one.length();
+        int twoLen = two.length();
+
+        int maximum = 0;
+        int minLength;
+
+        if(oneLen < twoLen) {
+            minLength = oneLen;
+        }
+        else if(oneLen > twoLen) {
+            minLength = twoLen;
+        }
+        else {
+            minLength = oneLen;
+        }
+
+        for(int i = 0; i < minLength; i++) {
+
+            if(one.charAt(i) == two.charAt(i)) {
+
+                maximum++;
+
+            }
+            else {
+
+                break;
+
+            }
+
+        }
+
+        return maximum;
 
     }
 
@@ -100,12 +174,13 @@ public class SuffixTree {
     public static void main(String args[]) {
 
         ArrayList<String> testList = new ArrayList<String>();
-        testList.add("Josh");
+        testList.add("josh0jos1jo2");
 
         SuffixTree st = new SuffixTree();
-        st.buildTree(st.concatStringWithSpecialCharacter(testList));
+        String str = st.concatStringWithSpecialCharacter(testList);
 
-        st.traverseSuffixTree(st);
+        st.buildTreeEdges(str);
+        st.traverseSuffixTree();
 
     }
 
