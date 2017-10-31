@@ -123,8 +123,8 @@ public class SuffixTree {
         }
 
         // No Similarities were found, add edge to the root node
-        Edge e = new Edge(substring, 0, ++endMax);
-
+        //Edge e = new Edge(substring, 0, ++endMax);
+        st.get(endMax).add(new Edge(substring, 0, ++endMax));
     }
 
     public void traverseSuffixTree() {
@@ -183,6 +183,7 @@ public class SuffixTree {
 
         st.buildTreeEdges(str);
         st.traverseSuffixTree();
+        
 
     }
 
