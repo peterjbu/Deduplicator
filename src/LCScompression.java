@@ -20,7 +20,8 @@ public class LCScompression{
                 break;
             }
         }
-        return file;
+        this.compressed = file;
+        return this.compressed;
     }
 
     public static void main(String args[]) {
