@@ -88,6 +88,8 @@ public class SuffixTree {
 
             // The inner loop focuses on iterating through the existing edges to find either splits, or new edges to add
             splitEdges(this.arr, substr, this.arr.get(0), endMax);
+            System.out.println(substr);
+            System.out.println(this.arr.get(0));
 
         }
 
@@ -95,27 +97,31 @@ public class SuffixTree {
 
     public void splitEdges(ArrayList<ArrayList<Edge>> st, String substring, ArrayList<Edge> outgoingEdges, int endMax) {
 
+        String edgeString = outgoingEdges.get(0).value;
+        //System.out.println(edgeString);
+
         for(int i = 0; i < outgoingEdges.size(); i++) {
 
-            String edgeString = outgoingEdges.get(i).value;
+            //String edgeString = outgoingEdges.get(i).value;
             int maximumSimilarity = longestEquivalentStartString(substring, edgeString);
+            //System.out.println(edgeString);
 
             if(maximumSimilarity > 0) {
-
+        		//System.out.println("maxsim works");
                 if (maximumSimilarity == edgeString.length()) { // Could be further down the branch
 
                     splitEdges(st, substring, st.get(outgoingEdges.get(i).end), endMax);
+                    System.out.println("maxsim = edgestringlength");
 
                 }
                 else {
-
                     String longestMatch = substring.substring(0, maximumSimilarity);
 
                     st.get(outgoingEdges.get(i).end).add(new Edge(substring.substring(maximumSimilarity,substring.length()), outgoingEdges.get(i).end, ++endMax));
                     st.get(outgoingEdges.get(i).end).add(new Edge(outgoingEdges.get(i).value.substring(maximumSimilarity,outgoingEdges.get(i).value.length()), outgoingEdges.get(i).end, ++endMax));
                     outgoingEdges.get(i).value = longestMatch;
                     return;
-
+                    
                 }
 
             }

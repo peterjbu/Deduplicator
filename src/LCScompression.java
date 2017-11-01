@@ -17,7 +17,7 @@ public class LCScompression{
             this.indexes.add(index);//add lcs index into the list of indexes
             file.replaceFirst(lcs, "");//replace first lcs in the string with "" empty string
             if (!file.contains(lcs)){
-                break;
+                i = file.length() + 1;
             }
         }
         this.compressed = file;
