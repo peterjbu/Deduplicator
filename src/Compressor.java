@@ -16,15 +16,27 @@ public class Compressor{
 
         //concatenate two files and build suffix tree to
         //find longest common substring of file1 and file2; hardcoded in for now.
-        this.lcs = findLCS(file1, file2);
+        lcs = findLCS(file1, file2);
 
-        int index=file2.indexOf(lcs);//index of the longest common substring
-        this.indexes.add(index);//add lcs index into the list of indexes
-        file2 = file2.replaceAll(lcs, "");//replace first lcs in the string with "" empty string
-//        System.out.println(file2);
+        while(file2.contains(lcs)) {
+            int index = file2.indexOf(lcs);//index of the longest common substring
+            indexes.add(index);//add lcs index into the list of indexes
+            file2 = file2.replaceFirst(lcs, "");//replace first lcs in the string with "" empty string
+            System.out.println("Position of " + lcs + " is " + index);
+        }
 
         this.compressed = file2;
         return this.compressed;
+    }
+
+    public String decompress(String compressedFile){
+        String result = compressed;
+        for (int i = indexes.size() - 1; i >= 0; i--){
+            String comStart = result.substring(0, indexes.get(i));
+            String comEnd = result.substring(indexes.get(i));
+            result = comStart + lcs + comEnd;
+        }
+        return result;
     }
 
     static String findLCS(String X, String Y)
@@ -93,7 +105,7 @@ public class Compressor{
 
         Compressor L = new Compressor();
 
-        String file1_test = "hellomyname";
+        String file1_test = "hellomynameisconrad";
 //            L.zipFiles.add(file1_test);
         String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
 //            L.zipFiles.add(file2_test);
@@ -106,7 +118,9 @@ public class Compressor{
 //    		    L.compress(L.zipFiles.get(0), L.zipFiles.get(i));
 //            }
 
-        System.out.println(L.compress(file1_test, file2_test));
+        //System.out.println(L.compress(file1_test, file2_test));
+        String result = L.compress(file1_test, file2_test);
+        System.out.println(L.decompress((result)));
 
         //System.out.println(L.findLCS(file1_test, file2_test));
 
