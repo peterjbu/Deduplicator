@@ -18,12 +18,10 @@ public class Compressor{
         //find longest common substring of file1 and file2; hardcoded in for now.
         this.lcs = findLCS(file1, file2);
 
-        while(file2.contains(lcs)){
-            int index=file2.indexOf(lcs);//index of the longest common substring
-            this.indexes.add(index);//add lcs index into the list of indexes
-            file2 = file2.replaceFirst(lcs, "");//replace first lcs in the string with "" empty string
-            System.out.println(file2);
-        }
+        int index=file2.indexOf(lcs);//index of the longest common substring
+        this.indexes.add(index);//add lcs index into the list of indexes
+        file2 = file2.replaceAll(lcs, "");//replace first lcs in the string with "" empty string
+        System.out.println(file2);
 
         this.compressed = file2;
         return this.compressed;
