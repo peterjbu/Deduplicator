@@ -1,14 +1,13 @@
 import java.util.ArrayList;
 
-public class LCScompression{
+public class Compressor{
     private String compressed;//result string of the compressed file without the longest common substring
     private ArrayList<Integer> indexes;//indexes of where the most common substring is
     private String lcs = "";
-    private int counter = 0;
     private ArrayList<String> zipFiles;
 
     //constructor for LCScompression
-    LCScompression(){
+    Compressor(){
         this.indexes = new ArrayList<Integer>();
         this.compressed = "";
     }
@@ -26,7 +25,6 @@ public class LCScompression{
         }
 
         if (file2.length() > 18){ //the smaller you want your file to be, the more time it will take.
-            counter++;
             compress(file1, file2);
         }
         else{
@@ -98,13 +96,13 @@ public class LCScompression{
 
 
     public static void main(String args[]) {
-    	
-    		LCScompression L = new LCScompression();
 
-            String file1_test = "hellomyname";
-            L.zipFiles.add(file1_test);
-    		String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
-            L.zipFiles.add(file2_test);
+        Compressor L = new Compressor();
+
+        String file1_test = "hellomyname";
+//            L.zipFiles.add(file1_test);
+        String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
+//            L.zipFiles.add(file2_test);
 //    		String file3_test = "hellomynameisdan";
 //    		L.zipFiles.add(file3_test);
 //    		String file4_test = "ellomynameisda";
@@ -113,12 +111,12 @@ public class LCScompression{
 //    		for (int i = 1; i < L.zipFiles.size(); i++){
 //    		    L.compress(L.zipFiles.get(0), L.zipFiles.get(i));
 //            }
-        System.out.println(L.zipFiles.);
 
         //System.out.println(L.compress(L.zipFiles.get(0), L.zipFiles.get(1)));
 
-    		//System.out.println(L.findLCS(file1_test, file2_test));
+        System.out.println(L.findLCS(file1_test, file2_test));
 
     }
 
 }
+
