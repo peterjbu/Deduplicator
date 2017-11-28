@@ -21,7 +21,7 @@ public class Compressor{
         int index=file2.indexOf(lcs);//index of the longest common substring
         this.indexes.add(index);//add lcs index into the list of indexes
         file2 = file2.replaceAll(lcs, "");//replace first lcs in the string with "" empty string
-        System.out.println(file2);
+//        System.out.println(file2);
 
         this.compressed = file2;
         return this.compressed;
