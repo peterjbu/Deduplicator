@@ -2,39 +2,54 @@ import java.util.ArrayList;
 
 public class Compressor{
     private String compressed;//result string of the compressed file without the longest common substring
-    private ArrayList<Integer> indexes;//indexes of where the most common substring is
-    private String lcs = "";
+    private ArrayList<ArrayList<Integer>> indexes;//indexes of where the most common substring is
+    private ArrayList<String> lcsList;
     private ArrayList<String> zipFiles;
+    private String uneditedFile = "";
 
     //constructor for LCScompression
     Compressor(){
-        this.indexes = new ArrayList<Integer>();
+        this.indexes = new ArrayList<ArrayList<Integer>>();
+        lcsList = new ArrayList<String>();
         this.compressed = "";
     }
 
     public String compress(String file1, String file2){
 
+        uneditedFile = file2;
         //concatenate two files and build suffix tree to
         //find longest common substring of file1 and file2; hardcoded in for now.
-        lcs = findLCS(file1, file2);
+        String currentLcs = findLCS(file1, file2);
+        lcsList.add(currentLcs);
 
-        while(file2.contains(lcs)) {
-            int index = file2.indexOf(lcs);//index of the longest common substring
-            indexes.add(index);//add lcs index into the list of indexes
-            file2 = file2.replaceFirst(lcs, "");//replace first lcs in the string with "" empty string
-            System.out.println("Position of " + lcs + " is " + index);
+        ArrayList<Integer> temp = new ArrayList<Integer>();
+
+        while(file2.contains(currentLcs)) {
+            int index = file2.indexOf(currentLcs);//index of the longest common substring
+            temp.add(index);//add lcsList index into the list of indexes
+            file2 = file2.replaceFirst(currentLcs, "");//replace first lcsList in the string with "" empty string
         }
 
-        this.compressed = file2;
+        indexes.add(temp);
+
+        if (file2.length() > 10) {
+            //System.out.println(currentLcs);
+            compress(file1, file2);
+        }
+        else
+            this.compressed = file2;
+
         return this.compressed;
     }
 
     public String decompress(String compressedFile){
         String result = compressed;
-        for (int i = indexes.size() - 1; i >= 0; i--){
-            String comStart = result.substring(0, indexes.get(i));
-            String comEnd = result.substring(indexes.get(i));
-            result = comStart + lcs + comEnd;
+        for (int i = indexes.size() - 1; i >= 0; i--) {
+            for (int j = indexes.get(i).size() - 1; j >= 0; j--) {
+                String comStart = result.substring(0, indexes.get(i).get(j));
+                String comEnd = result.substring(indexes.get(i).get(j));
+                result = comStart + lcsList.get(i) + comEnd;
+            }
         }
         return result;
     }
@@ -105,7 +120,7 @@ public class Compressor{
 
         Compressor L = new Compressor();
 
-        String file1_test = "hellomynameisconrad";
+        String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
 //            L.zipFiles.add(file1_test);
         String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
 //            L.zipFiles.add(file2_test);
@@ -120,6 +135,7 @@ public class Compressor{
 
         //System.out.println(L.compress(file1_test, file2_test));
         String result = L.compress(file1_test, file2_test);
+        System.out.println(result);
         System.out.println(L.decompress((result)));
 
         //System.out.println(L.findLCS(file1_test, file2_test));
