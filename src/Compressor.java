@@ -22,14 +22,10 @@ public class Compressor{
             int index=file2.indexOf(lcs);//index of the longest common substring
             this.indexes.add(index);//add lcs index into the list of indexes
             file2 = file2.replaceFirst(lcs, "");//replace first lcs in the string with "" empty string
+            System.out.println(file2);
         }
 
-        if (file2.length() > 18){ //the smaller you want your file to be, the more time it will take.
-            compress(file1, file2);
-        }
-        else{
-            this.compressed = file2;
-        }
+        this.compressed = file2;
         return this.compressed;
     }
 
@@ -112,9 +108,9 @@ public class Compressor{
 //    		    L.compress(L.zipFiles.get(0), L.zipFiles.get(i));
 //            }
 
-        //System.out.println(L.compress(L.zipFiles.get(0), L.zipFiles.get(1)));
+        System.out.println(L.compress(file1_test, file2_test));
 
-        System.out.println(L.findLCS(file1_test, file2_test));
+        //System.out.println(L.findLCS(file1_test, file2_test));
 
     }
 
