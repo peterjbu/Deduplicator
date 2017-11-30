@@ -6,6 +6,7 @@ public class Compressor{
     private ArrayList<ArrayList<Integer>> lcsList;
     private ArrayList<String> zipFiles;
     private String uneditedFile;
+    private int status;
 
     //constructor for LCScompression
     Compressor(){
@@ -16,7 +17,6 @@ public class Compressor{
     }
 
     public String compress(String file1, String file2){
-
         uneditedFile = file2;
 
         ArrayList<Integer> subIndex = new ArrayList<Integer>();
@@ -53,7 +53,6 @@ public class Compressor{
 
          **/
         else {
-            file2 += "\nM*D\n";
             for (int i = 0; i < indexes.size(); i++) {
                 file2 += "\n";
                 for (int j = 0; j < indexes.get(i).size(); j++) {
