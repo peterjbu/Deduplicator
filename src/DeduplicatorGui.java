@@ -26,26 +26,21 @@ class Task extends SwingWorker<Void, Void> {
      */
     @Override
     public Void doInBackground() {
-        int progress = 0;
-        //Initialize progress property.
-        setProgress(0);
+
         if(start == 1) {
             Random random = new Random();
-            String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
-            String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
-            Compressor L12 = new Compressor(file1_test,file2_test);
-
+            int progress = 0;
+            //Initialize progress property.
+            setProgress(0);
             while (progress < 100) {
                 //Sleep for up to one second.
                 try {
                     Thread.sleep(random.nextInt(1000));
-                } catch (InterruptedException ignore) {
-                }
+                } catch (InterruptedException ignore) {}
                 //Make random progress.
                 progress += random.nextInt(10);
                 setProgress(Math.min(progress, 100));
             }
-
             start = 0;
         }
         else if (delete == 1){
@@ -144,7 +139,7 @@ class Task extends SwingWorker<Void, Void> {
      * Invoked when task's progress property changes.
      */
     public void propertyChange(PropertyChangeEvent evt) {
-       while ("progress"==evt.getPropertyName()) {
+       if ("progress"==evt.getPropertyName()) {
            int progress = (Integer) evt.getNewValue();
             progressBar.setValue(progress);
             taskOutput.append(String.format(
