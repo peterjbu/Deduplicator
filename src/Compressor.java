@@ -141,8 +141,6 @@ public class Compressor{
 
 
     public static void main(String args[]) {
-
-
         Compressor L12 = new Compressor();
 
         String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
