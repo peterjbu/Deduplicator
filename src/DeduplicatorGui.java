@@ -26,18 +26,15 @@ class Task extends SwingWorker<Void, Void> {
      */
     @Override
     public Void doInBackground() {
-        Compressor L2 = new Compressor();
         int progress = 0;
         //Initialize progress property.
         setProgress(0);
         if(start == 1) {
             Random random = new Random();
-            Compressor L12 = new Compressor();
             String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
             String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
+            Compressor L12 = new Compressor(file1_test,file2_test);
 
-            String result = L12.compress(file1_test, file2_test);
-            System.out.println(result);
             while (progress < 100) {
                 //Sleep for up to one second.
                 try {
@@ -53,16 +50,11 @@ class Task extends SwingWorker<Void, Void> {
         }
         else if (delete == 1){
             //Delete()
-            Compressor l1 = new Compressor();
-            String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
-            String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
-
                 //Sleep for up to one second.
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignore) {
                 }
-                l1.compress(file1_test,file2_test);
                 //add a variable to compressor that has the max number for each file and just use this
                 delete = 0;
         }

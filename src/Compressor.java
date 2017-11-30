@@ -1,22 +1,29 @@
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.*;
 
 public class Compressor{
-    private String compressed;//result string of the compressed file without the longest common substring
     private ArrayList<ArrayList<Integer>> indexes;//indexes of where the most common substring is
     private ArrayList<ArrayList<Integer>> lcsList;
-    private ArrayList<String> zipFiles;
+    private String compressed;//result string of the compressed file without the longest common substring
     private String uneditedFile;
-    private int status;
+    private String referenceFile;
+    private String fileToCompress;
 
     //constructor for LCScompression
-    Compressor(){
+    Compressor(String reference, String file2){
         this.indexes = new ArrayList<ArrayList<Integer>>();
         this.lcsList = new ArrayList<ArrayList<Integer>>();
         this.compressed = "";
         this.uneditedFile = "";
+        referenceFile = reference;
+        fileToCompress = file2;
+        compress(referenceFile, fileToCompress);
     }
 
-    public String compress(String file1, String file2){
+    private String compress(String file1, String file2){
         uneditedFile = file2;
 
         ArrayList<Integer> subIndex = new ArrayList<Integer>();
@@ -42,7 +49,7 @@ public class Compressor{
         }
         indexes.add(temp);
 
-        if (file2.length() > 5) {
+        if (file2.length() > 4) {
             compress(file1, file2);
         }
         /** the data required to reconstruct the file based off of the reference file is appended to the
@@ -57,13 +64,19 @@ public class Compressor{
                 file2 += "\n";
                 for (int j = 0; j < indexes.get(i).size(); j++) {
                     file2 += indexes.get(i).get(j);
+                    file2 += ":";
                     file2 += lcsList.get(i);
+                    file2 += ",";
                 }
             }
             this.compressed = file2;
         }
 
         return this.compressed;
+    }
+
+    public String getCompressed(){
+        return compressed;
     }
 
 //    public String decompress(String compressedFile){
@@ -140,13 +153,36 @@ public class Compressor{
 
 
     public static void main(String args[]) {
-        Compressor L12 = new Compressor();
-
         String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
         String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
+//        String file1_test = "hellomynameisConrad";
+//        String file2_test = "hellomynameisPeterhellomynameisJosh";
+
+        Compressor L12 = new Compressor(file1_test, file2_test);
+
 
         String result = L12.compress(file1_test, file2_test);
         System.out.println(result);
+
+        File file = new File("file2_test.txt");
+        // creates the file
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("file2_test.txt"), "utf-8")))
+        {
+            writer.write(result);
+        }
+        catch (IOException e){
+            System.out.println("IO exception.");
+        }
+
+        File reference = new File("file1_test.txt");
+        // creates the file
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("file1_test.txt"), "utf-8")))
+        {
+            writer.write(file1_test);
+        }
+        catch (IOException e){
+            System.out.println("IO exception.");
+        }
     }
 
 }
