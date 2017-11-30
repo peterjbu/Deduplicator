@@ -9,13 +9,18 @@ public class Compressor{
     private ArrayList<ArrayList<Integer>> lcsList;
     private String compressed;//result string of the compressed file without the longest common substring
     private String uneditedFile;
+    private String referenceFile;
+    private String fileToCompress;
 
     //constructor for LCScompression
-    Compressor(){
+    Compressor(String reference, String file2){
         this.indexes = new ArrayList<ArrayList<Integer>>();
         this.lcsList = new ArrayList<ArrayList<Integer>>();
         this.compressed = "";
         this.uneditedFile = "";
+        referenceFile = reference;
+        fileToCompress = file2;
+        compress(referenceFile, fileToCompress);
     }
 
     private String compress(String file1, String file2){
@@ -69,6 +74,10 @@ public class Compressor{
         }
 
         return this.compressed;
+    }
+
+    public String getCompressed(){
+        return compressed;
     }
 
 //    public String decompress(String compressedFile){
@@ -146,12 +155,13 @@ public class Compressor{
 
 
     public static void main(String args[]) {
-        Compressor L12 = new Compressor();
-
         String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
         String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
 //        String file1_test = "hellomynameisConrad";
 //        String file2_test = "hellomynameisPeterhellomynameisJosh";
+
+        Compressor L12 = new Compressor(file1_test, file2_test);
+
 
         String result = L12.compress(file1_test, file2_test);
         System.out.println(result);
