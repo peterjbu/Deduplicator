@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class Deduplicator {
                 String filePath = optionsMap.get("-addFile");
                 String[] directories = filePath.split("/");
                 String fileName = directories[directories.length - 1];
+                String newFileContent = "";
 
                 fileContents = readFrom(filePath);
 
@@ -80,7 +82,16 @@ public class Deduplicator {
                     String compressedText = comp.getCompressed();
                     writeTo("lockers/" + locker + "/" + fileName, compressedText);
 
-                    //update the fileListContents .fileList by incrementing the counter and adding fileName and locker 
+                    //update the fileListContents .fileList by incrementing the counter and adding fileName and locker
+                    try
+                    {
+                        newFileContent = "," + fileName + ":" + optionsMap.get("-locker");
+
+                        Files.write(Paths.get(".fileList"), newFileContent.getBytes(), StandardOpenOption.APPEND);
+                    }catch (IOException e)
+                    {
+                        System.out.println("Unable to append file");
+                    }
 
                 }
 

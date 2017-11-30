@@ -1,2 +1,2 @@
 1,file1_test.txt,A
-file1_test.txt:A
+file1_test.txt:A,file2_test.txt:A,file3_test.txt:A
