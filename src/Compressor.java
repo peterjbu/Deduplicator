@@ -53,6 +53,7 @@ public class Compressor{
 
          **/
         else {
+            file2 += "\nM*D\n";
             for (int i = 0; i < indexes.size(); i++) {
                 file2 += "\n";
                 for (int j = 0; j < indexes.get(i).size(); j++) {
@@ -128,7 +129,6 @@ public class Compressor{
         while (LCSuff[row][col] != 0) {
             resultStr  = X.charAt(row - 1) + resultStr; // or Y[col-1]
             --len;
-
             // move diagonally up to previous cell
             row--;
             col--;

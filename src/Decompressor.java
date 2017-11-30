@@ -1,12 +1,15 @@
 import java.util.ArrayList;
 
-public class Decompressor {
+public class Decompressor extends Compressor {
     private String compressed;
-    private String[] metadata;
+    private String metadata;
 
     public Decompressor(String compressedFile){
         compressed = compressedFile;
-        metadata = compressedFile.split(System.getProperty(""));
+        if (compressedFile.contains("M*D")){
+        int index = compressedFile.indexOf("M*D");
+        metadata = compressedFile.substring(index+3,compressedFile.length()-1);
+        }
 
     }
 
@@ -22,13 +25,17 @@ public class Decompressor {
 //    }
 
     public static void main(String args[]) {
-        String test = "hello" +
-                "myname is " +
-                "Olaf";
-        Decompressor D = new Decompressor(test);
+        Compressor L12 = new Compressor();
+
+        String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
+        String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
+
+        String result = L12.compress(file1_test, file2_test);
+        System.out.println(result);
+        Decompressor D = new Decompressor(result);
 //        for (int i = 0; i < D.metadata.length; i++){
 //            System.out.println(D.metadata[i]);
 //        }
-        System.out.println(D.metadata[0]);
+        System.out.println(D.metadata);
     }
 }
