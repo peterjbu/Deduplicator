@@ -6,13 +6,14 @@ import java.util.regex.Pattern;
 public class Decompressor {
     private String compressed;
     private String[] metadata;
-    private ArrayList<ArrayList<Integer>> indexes; //indexes of where the most common substring is
+    private ArrayList<Integer> indexes; //indexes of where the most common substring is
     private ArrayList<ArrayList<Integer>> lcsList;
 
     public Decompressor(String compressedFile){
         compressed = compressedFile;
         metadata = compressedFile.split(System.getProperty("line.separator"));
         lcsList = new ArrayList<ArrayList<Integer>>();
+        indexes = new ArrayList<Integer>();
         //metadata[0] is compressed text.
     }
 
@@ -20,6 +21,24 @@ public class Decompressor {
         for (int i = metadata.length - 1; i > 0; i--) {
             Pattern p = Pattern.compile("\\[(.*?)\\]");
             Matcher m = p.matcher(metadata[i]);
+
+            String compressIndex = "";
+
+            for (int j = metadata[i].length() - 1; j >= 0; j--) {
+                if (metadata[i].charAt(j) == ':') {
+
+                    while (metadata[i].charAt(j-1) != ',') {
+                        compressIndex = metadata[i].charAt(j-1) + compressIndex;
+                        j--;
+                        if (j == 0)
+                            break;
+                    }
+
+                    indexes.add(Integer.parseInt(compressIndex));
+                    System.out.println(Integer.parseInt(compressIndex));
+                    compressIndex = "";
+                }
+            }
 
             while (m.find()) {
                 ArrayList<Integer> tempLCS = new ArrayList<Integer>(); //holds each substring temporarily
