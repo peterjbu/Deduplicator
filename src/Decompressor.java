@@ -4,14 +4,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Decompressor {
-    private String compressed;
+    private String reference;
     private String[] metadata;
+    private String decompressed;
+    private String compressed;
     private ArrayList<Integer> indexes; //indexes of where the most common substring is
     private ArrayList<ArrayList<Integer>> lcsList;
 
-    public Decompressor(String compressedFile){
-        compressed = compressedFile;
+    public Decompressor(String referenceFile, String compressedFile){
+        reference = referenceFile;
         metadata = compressedFile.split(System.getProperty("line.separator"));
+        decompressed = "";
+        compressed = metadata[0];
         lcsList = new ArrayList<ArrayList<Integer>>();
         indexes = new ArrayList<Integer>();
         //metadata[0] is compressed text.
@@ -35,7 +39,6 @@ public class Decompressor {
                     }
 
                     indexes.add(Integer.parseInt(compressIndex));
-                    System.out.println(Integer.parseInt(compressIndex));
                     compressIndex = "";
                 }
             }
@@ -52,26 +55,28 @@ public class Decompressor {
         }
     }
 
-//    public String decompressor(){
-//        for (int i = indexes.size() - 1; i >= 0; i--) {
-//            for (int j = indexes.get(i).size() - 1; j >= 0; j--) {
-//                String comStart = result.substring(0, indexes.get(i).get(j));
-//                String comEnd = result.substring(indexes.get(i).get(j));
-//                result = comStart + lcsList.get(i) + comEnd;
-//            }
-//        }
-//        return result;
-//    }
+    public String decompressor(){
+        filter();
+        String temp = compressed;
+        for (int i = 0; i < indexes.size(); i++) {
+            String comStart = temp.substring(0, indexes.get(i));
+            String comEnd = temp.substring(indexes.get(i));
+            temp = comStart + reference.substring(lcsList.get(i).get(0), lcsList.get(i).get(1)) + comEnd;
+        }
+
+        decompressed = temp;
+
+        return decompressed;
+    }
 
     public static void main(String args[]) {
         String test = "i\n16:[17, 29],\n0:[18, 29],12:[18, 29],\n6:[29, 35],\n6:[46, 52],\n0:[11, 16],";
-        Decompressor D = new Decompressor(test);
-        D.filter();
+        String reference = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
+        Decompressor D = new Decompressor(reference, test);
+        System.out.println(D.decompressor());
 //        for (int i = 0; i < D.metadata.length; i++){
 //            System.out.println(D.metadata[i]);
 //        }
-        for (int i = 0; i < D.lcsList.size(); i++){
-            System.out.println(D.lcsList.get(i));
-        }
+
     }
 }
