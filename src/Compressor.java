@@ -1,4 +1,8 @@
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.*;
 
 public class Compressor{
     private ArrayList<ArrayList<Integer>> indexes;//indexes of where the most common substring is
@@ -151,6 +155,26 @@ public class Compressor{
 
         String result = L12.compress(file1_test, file2_test);
         System.out.println(result);
+
+        File file = new File("file2_test.txt");
+        // creates the file
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("file2_test.txt"), "utf-8")))
+        {
+            writer.write(result);
+        }
+        catch (IOException e){
+            System.out.println("IO exception.");
+        }
+
+        File reference = new File("file1_test.txt");
+        // creates the file
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("file1_test.txt"), "utf-8")))
+        {
+            writer.write(file1_test);
+        }
+        catch (IOException e){
+            System.out.println("IO exception.");
+        }
     }
 
 }
