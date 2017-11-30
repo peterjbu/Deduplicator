@@ -45,7 +45,7 @@ public class Decompressor {
 //    }
 
     public static void main(String args[]) {
-        String test = "i\n16[17, 29]\n0[18, 29]12[18, 29]\n6[29, 35]\n6[46, 52]\n0[11, 16]";
+        String test = "i\n16:[17, 29],\n0:[18, 29],12:[18, 29],\n6:[29, 35],\n6:[46, 52],\n0:[11, 16],";
         Decompressor D = new Decompressor(test);
         D.filter();
 //        for (int i = 0; i < D.metadata.length; i++){

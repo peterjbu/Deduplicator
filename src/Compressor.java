@@ -57,7 +57,9 @@ public class Compressor{
                 file2 += "\n";
                 for (int j = 0; j < indexes.get(i).size(); j++) {
                     file2 += indexes.get(i).get(j);
+                    file2 += ":";
                     file2 += lcsList.get(i);
+                    file2 += ",";
                 }
             }
             this.compressed = file2;
