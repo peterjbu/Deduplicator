@@ -1,13 +1,36 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Decompressor {
     private String compressed;
     private String[] metadata;
+    private ArrayList<ArrayList<Integer>> indexes; //indexes of where the most common substring is
+    private ArrayList<ArrayList<Integer>> lcsList;
 
     public Decompressor(String compressedFile){
         compressed = compressedFile;
-        metadata = compressedFile.split(System.getProperty(""));
+        metadata = compressedFile.split(System.getProperty("line.separator"));
+        lcsList = new ArrayList<ArrayList<Integer>>();
+        //metadata[0] is compressed text.
+    }
 
+    public void filter(){
+        for (int i = metadata.length - 1; i > 0; i--) {
+            Pattern p = Pattern.compile("\\[(.*?)\\]");
+            Matcher m = p.matcher(metadata[i]);
+
+            while (m.find()) {
+                ArrayList<Integer> tempLCS = new ArrayList<Integer>(); //holds each substring temporarily
+                String[] temp = m.group(1).split(",");
+                int start = Integer.parseInt(temp[0].trim());
+                int end = Integer.parseInt((temp[1].trim()));
+                tempLCS.add(start);
+                tempLCS.add(end);
+                lcsList.add(tempLCS);
+            }
+        }
     }
 
 //    public String decompressor(){
@@ -22,13 +45,14 @@ public class Decompressor {
 //    }
 
     public static void main(String args[]) {
-        String test = "hello" +
-                "myname is " +
-                "Olaf";
+        String test = "i\n16[17, 29]\n0[18, 29]12[18, 29]\n6[29, 35]\n6[46, 52]\n0[11, 16]";
         Decompressor D = new Decompressor(test);
+        D.filter();
 //        for (int i = 0; i < D.metadata.length; i++){
 //            System.out.println(D.metadata[i]);
 //        }
-        System.out.println(D.metadata[0]);
+        for (int i = 0; i < D.lcsList.size(); i++){
+            System.out.println(D.lcsList.get(i));
+        }
     }
 }
