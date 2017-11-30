@@ -18,10 +18,11 @@ public class Decompressor {
         compressed = metadata[0];
         lcsList = new ArrayList<ArrayList<Integer>>();
         indexes = new ArrayList<Integer>();
+        decompressor();
         //metadata[0] is compressed text.
     }
 
-    public void filter(){
+    private void filter(){
         for (int i = metadata.length - 1; i > 0; i--) {
             Pattern p = Pattern.compile("\\[(.*?)\\]");
             Matcher m = p.matcher(metadata[i]);
@@ -55,7 +56,7 @@ public class Decompressor {
         }
     }
 
-    public String decompressor(){
+    private void decompressor(){
         filter();
         String temp = compressed;
         for (int i = 0; i < indexes.size(); i++) {
@@ -63,9 +64,10 @@ public class Decompressor {
             String comEnd = temp.substring(indexes.get(i));
             temp = comStart + reference.substring(lcsList.get(i).get(0), lcsList.get(i).get(1)) + comEnd;
         }
-
         decompressed = temp;
+    }
 
+    public String getDecompressed() {
         return decompressed;
     }
 
@@ -73,7 +75,7 @@ public class Decompressor {
         String test = "i\n16:[17, 29],\n0:[18, 29],12:[18, 29],\n6:[29, 35],\n6:[46, 52],\n0:[11, 16],";
         String reference = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
         Decompressor D = new Decompressor(reference, test);
-        System.out.println(D.decompressor());
+        System.out.println(D.getDecompressed());
 //        for (int i = 0; i < D.metadata.length; i++){
 //            System.out.println(D.metadata[i]);
 //        }

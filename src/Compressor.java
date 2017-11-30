@@ -1,10 +1,9 @@
 import java.util.ArrayList;
 
 public class Compressor{
-    private String compressed;//result string of the compressed file without the longest common substring
     private ArrayList<ArrayList<Integer>> indexes;//indexes of where the most common substring is
     private ArrayList<ArrayList<Integer>> lcsList;
-    private ArrayList<String> zipFiles;
+    private String compressed;//result string of the compressed file without the longest common substring
     private String uneditedFile;
 
     //constructor for LCScompression
@@ -15,7 +14,7 @@ public class Compressor{
         this.uneditedFile = "";
     }
 
-    public String compress(String file1, String file2){
+    private String compress(String file1, String file2){
 
         uneditedFile = file2;
 
