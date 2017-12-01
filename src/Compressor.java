@@ -1,8 +1,13 @@
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.io.*;
 import java.util.regex.Pattern;
+import java.util.Base64;
+import java.util.zip.*;
 
 public class Compressor{
     private ArrayList<ArrayList<Integer>> indexes;//indexes of where the most common substring is
@@ -173,7 +178,36 @@ public class Compressor{
         return resultStr;
     }
 
+    public static void storeDirectoryAsEntity(File directory, ZipOutputStream zo) {
 
+        try {
+            for (File file : directory.listFiles()) {
+
+                if(file.isDirectory()) {
+
+                    storeDirectoryAsEntity(file, zo);
+
+                }
+                else {
+
+                    System.out.println(file.getAbsolutePath());
+                    byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+                    zo.putNextEntry(new ZipEntry(file.getName()));
+                    zo.write(data,0,data.length);
+                    zo.closeEntry();
+
+                }
+
+            }
+
+            zo.close();
+
+        }
+        catch (IOException i) {
+            System.out.println("ERROR");
+        }
+
+    }
 
     public static void main(String args[]) {
         String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
@@ -206,6 +240,15 @@ public class Compressor{
         }
         catch (IOException e){
             System.out.println("IO exception.");
+        }
+
+        File dir = new File("/Users/joshsurette/Desktop/try/");
+        try {
+            ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream("/Users/joshsurette/Desktop/ec504projectgroup8_2.zip"));
+            storeDirectoryAsEntity(dir, zipOutputStream);
+        }
+        catch (FileNotFoundException f) {
+            System.out.println("ERROR2");
         }
     }
 
