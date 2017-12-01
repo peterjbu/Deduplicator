@@ -5,7 +5,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 public class Decompressor {
     private String reference;
@@ -75,25 +76,32 @@ public class Decompressor {
         return decompressed;
     }
 
-    public static void main(String args[]) {
-//        String test = "i\n16:[17, 29],\n0:[18, 29],12:[18, 29],\n6:[29, 35],\n6:[46, 52],\n0:[11, 16],";
-//        String reference = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
-        String reference = "";
-        String test = "";
-
-        try {
-            reference = new String(Files.readAllBytes(Paths.get("file1_test.txt")), StandardCharsets.UTF_8);
-            test = new String(Files.readAllBytes(Paths.get("file2_test.txt")), StandardCharsets.UTF_8);
-        }
-        catch (IOException e){
-            System.out.println("IO exception");
-        }
-
-//        Decompressor D = new Decompressor(reference, test);
-//        System.out.println(D.getDecompressed());
-//        for (int i = 0; i < D.metadata.length; i++){
-//            System.out.println(D.metadata[i]);
+//    public static void main(String args[]) {
+////        String test = "i\n16:[17, 29],\n0:[18, 29],12:[18, 29],\n6:[29, 35],\n6:[46, 52],\n0:[11, 16],";
+////        String reference = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
+//        String reference = "";
+//        String test = "";
+//
+//        try {
+//            reference = new String(Files.readAllBytes(Paths.get("file1_test.txt")), StandardCharsets.UTF_8);
+//            test = new String(Files.readAllBytes(Paths.get("file2_test.txt")), StandardCharsets.UTF_8);
 //        }
-
-    }
+//        catch (IOException e){
+//            System.out.println("IO exception");
+//        }
+//
+////        Decompressor D = new Decompressor(reference, test);
+////        System.out.println(D.getDecompressed());
+////        for (int i = 0; i < D.metadata.length; i++){
+////            System.out.println(D.metadata[i]);
+////        }
+//
+//        String test = "";
+//        try (BufferedReader br = new BufferedReader(new FileReader("testCompressed.txt"))) {
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                test += line;
+//            }
+//        }
+//    }
 }
