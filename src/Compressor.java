@@ -209,7 +209,7 @@ public class Compressor{
         catch (IOException i) {
             System.out.println("ERROR");
         }
-
+        
     }
 
     public static void addFolderToDirectory(ZipOutputStream zip, File folderPath, String filename) {
