@@ -23,7 +23,7 @@ public class Deduplicator {
          * All flags that can be added as args to the command line
          */
 
-        final List argList = Arrays.asList("-addFile", "-locker");
+        final List argList = Arrays.asList("-addFile", "-locker", "-retrieve", "-dest");
         Map<String, String> optionsMap = new HashMap<String, String>();
 
         for (int i = 0; i < args.length; i++) {
@@ -39,6 +39,10 @@ public class Deduplicator {
                     throw new IllegalArgumentException("Not a valid argument: " + args[i]);
                 }
             }
+        }
+
+        if (optionsMap.get("-retrieve") != null && optionsMap.get("-dest") != null) {
+            retrieve(optionsMap.get("-retrieve"), optionsMap.get("-dest"));
         }
 
         /**
@@ -174,6 +178,17 @@ public class Deduplicator {
             e.printStackTrace();
         }
         return fileContents;
+    }
+
+    private static void retrieve(String filePath, String dest) {
+        String lockerPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        String fileName = filePath.substring(filePath.lastIndexOf('/'));
+        String fileListContents = readFrom(lockerPath + "/.fileList");
+        String referenceContents = readFrom(lockerPath + "/" + fileListContents.split(",")[0]);
+        String compressedContents = readFrom(filePath);
+        String decompressed = new Decompressor(referenceContents, compressedContents).getDecompressed();
+        fileName.substring(0, fileName.lastIndexOf("."));
+        writeTo(dest + "/" + fileName.substring(0, fileName.lastIndexOf(".")), decompressed);
     }
 
 //    private static long getFileSize(File file){
