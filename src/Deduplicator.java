@@ -130,7 +130,7 @@ public class Deduplicator {
      * @param filePath: The file to add
      * @param lockerPath: The locker to add file to
      */
-    private static void addFile(String filePath, String lockerPath){
+    public static void addFile(String filePath, String lockerPath){
         File dirPath = new File(lockerPath);
         if (!dirPath.exists()) {
             boolean success = dirPath.mkdir();
@@ -165,7 +165,7 @@ public class Deduplicator {
         }
     }
 
-    private static void retrieve(String filePath, String dest) {
+    public static void retrieve(String filePath, String dest) {
         String lockerPath = filePath.substring(0, filePath.lastIndexOf('/'));
         String fileName = filePath.substring(filePath.lastIndexOf('/'));
         String metaPath = filePath.substring(0, filePath.lastIndexOf(".")) + ".meta";

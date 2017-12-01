@@ -14,16 +14,20 @@ import java.util.Random;
 public class DeduplicatorGui extends JPanel implements ActionListener, PropertyChangeListener {
 
 private JProgressBar progressBar;
-private JButton startButton, openButton, deleteButton, decompressButton;
+private JButton startButton, openButton, deleteButton, decompressButton, newLocker;
+private JDialog jd;
 private JTextArea taskOutput;
 private Task task;
 private JFileChooser fc;
 private int start = 0;
 private int delete = 0;
 private int decompress = 0;
+private int newlocker = 0;
 private File[] fileNames;
 private File referenceFile;
 private File[] deletefileNames;
+private File dirPath;
+
 
 
 class Task extends SwingWorker<Void, Void> {
@@ -34,22 +38,23 @@ class Task extends SwingWorker<Void, Void> {
     public Void doInBackground() {
 
         if(start == 1) {
+            System.out.println("start");
             referenceFile =  fileNames[0];
             String ref = referenceFile.getName();
+            Deduplicator deduplicator = new Deduplicator();
             try {
                 int progress = 0;
                 setProgress(0);
                 String referenceContent = new String(Files.readAllBytes(Paths.get(ref)));
-                for (int ii = 1; ii<fileNames.length; ii++){
+                //System.out.println(dirPath.getAbsolutePath());
+                for (int ii = 0; ii<fileNames.length; ii++){
                     File current =fileNames[ii];
-                    String currentFile = current.getName();
-                    try {
-                        String curr = new String(Files.readAllBytes(Paths.get(currentFile)));
-                        Compressor compress = new Compressor(referenceContent, curr);
-                    }
-                    catch (IOException ex){
-                        System.out.println("IO exception");
-                    }
+                    System.out.println("current file");;
+                    String currentFile = current.getAbsolutePath();
+                    System.out.println(currentFile);
+                    System.out.println("dirPath++ ");
+                    System.out.println(dirPath.getAbsolutePath());
+                    deduplicator.addFile(currentFile, dirPath.getAbsolutePath());
                 }
             }
             catch (IOException ex){
@@ -66,26 +71,13 @@ class Task extends SwingWorker<Void, Void> {
                 delete = 0;
         }
         else if(decompress == 1){
-            String reference = "";
-            String test = "";
-            File path = fileNames[0].getParentFile();
-            for (final File fileEntry : path.listFiles()) {
-                if (fileEntry.getName().contains(".anchor")) {
-                    reference = fileEntry.getName();
-                } else {
-                    System.out.println("No Anchor File");
-                }
-            }
-
+            Deduplicator deduplicator = new Deduplicator();
+            System.out.println("Hi here");
+            System.out.println(fileNames.length + "#");
             for (int i = 0; i<fileNames.length; i++) {
-                try {
-                    reference = new String(Files.readAllBytes(Paths.get(reference)), StandardCharsets.UTF_8);
-                    test = new String(Files.readAllBytes(Paths.get(fileNames[i].getName())), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    System.out.println("IO exception");
+                System.out.println(fileNames[i].getAbsolutePath());
+                deduplicator.retrieve(fileNames[i].getAbsolutePath(), dirPath.getAbsolutePath());
                 }
-                Decompressor D = new Decompressor(reference, test,fileNames[i].getName().replace(".txt",".meta"));
-            }
 
             //System.out.println(D.getDecompressed());
             decompress = 0;
@@ -122,6 +114,10 @@ class Task extends SwingWorker<Void, Void> {
             taskOutput.append("Decompressed Files! \n");
             decompress = 0;
         }
+        else if (newlocker==1){
+            taskOutput.append("New locker at path " + dirPath.getAbsolutePath() + "\n");
+            newlocker = 0;
+        }
         taskOutput.append("Done!\n");
     }
 }
@@ -142,6 +138,11 @@ class Task extends SwingWorker<Void, Void> {
         decompressButton.setActionCommand("decompress");
         decompressButton.addActionListener(this);
 
+        newLocker = new JButton("Set/New Locker");
+        newLocker.setActionCommand("newLocker");
+        newLocker.addActionListener(this);
+
+
         fc = new JFileChooser();
         fc.setMultiSelectionEnabled(true);
         openButton = new JButton("Open a File...");
@@ -157,6 +158,7 @@ class Task extends SwingWorker<Void, Void> {
 
         JPanel panel = new JPanel();
         //panel.add(openButton);
+        panel.add(newLocker);
         panel.add(startButton);
         panel.add(deleteButton);
         panel.add(decompressButton);
@@ -201,6 +203,21 @@ class Task extends SwingWorker<Void, Void> {
                 //This is where a real application would open the file
             }
             decompress = 1;
+        }
+        else if(evt.getSource() == newLocker){
+            String locker = JOptionPane.showInputDialog("ENTER NEW LOCKER NAME\n Or SET ");
+            if((dirPath==null)) {
+                locker = locker + ".locker";
+                dirPath = new File(locker);
+                System.out.println(dirPath.getAbsolutePath());
+                if (!dirPath.exists()) {
+                    boolean success = dirPath.mkdir();
+                    if (!success) {
+                        throw new IllegalArgumentException("Unable to create locker at" + locker);
+                    }
+                }
+            }
+            newlocker=1;
         }
 
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
