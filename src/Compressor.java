@@ -178,33 +178,69 @@ public class Compressor{
         return resultStr;
     }
 
-    public static void storeDirectoryAsEntity(File directory, ZipOutputStream zo) {
+    /**
+     * Unfinished implementation of zipping directories as one entity. Implementing the internal directories would have
+     * been accomplished by Base64 encoding of the zipped directory
+     */
+    public static void storeDirectoryAsEntity(File directory, String path) {
 
         try {
+
+            ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(new File(path)));
+            // Instantiate a Stream to write to our zip file
             for (File file : directory.listFiles()) {
 
-                if(file.isDirectory()) {
-
-                    storeDirectoryAsEntity(file, zo);
-
+                if(!file.isDirectory()) {
+                    System.out.println(file.getName());
+                    zip.putNextEntry(new ZipEntry(file.getName()));
+                    byte[] bytes = file.toString().getBytes();
+                    zip.write(bytes, 0, bytes.length);
+                    zip.closeEntry();
                 }
                 else {
-
-                    System.out.println(file.getAbsolutePath());
-                    byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-                    zo.putNextEntry(new ZipEntry(file.getName()));
-                    zo.write(data,0,data.length);
-                    zo.closeEntry();
-
+                    addFolderToDirectory(zip, directory, file.toString());
                 }
 
             }
 
-            zo.close();
+            zip.close();
 
         }
         catch (IOException i) {
             System.out.println("ERROR");
+        }
+
+    }
+
+    public static void addFolderToDirectory(ZipOutputStream zip, File folderPath, String filename) {
+
+        try {
+
+            System.out.println("HERE");
+            File internalDir = new File(folderPath + "/folder.zip");
+            ZipOutputStream internalZip = new ZipOutputStream(new FileOutputStream(internalDir.getName()));
+
+            if(internalDir.listFiles() != null) {
+
+                for (File file : internalDir.listFiles()) {
+
+                    System.out.println(file.getName());
+                    internalZip.putNextEntry(new ZipEntry(file.getName()));
+                    byte[] bytes = file.toString().getBytes();
+                    internalZip.write(bytes, 0, bytes.length);
+                    internalZip.closeEntry();
+
+                }
+
+                zip.putNextEntry(new ZipEntry(internalDir.getName()));
+                zip.write(Files.readAllBytes(Paths.get(filename)));
+                zip.closeEntry();
+
+            }
+
+        }
+        catch (IOException e) {
+            System.out.println("ERROR IN INTERNAL ZIP");
         }
 
     }
@@ -242,15 +278,9 @@ public class Compressor{
             System.out.println("IO exception.");
         }
 
-        File dir = new File("/Users/joshsurette/Desktop/try/");
-        try {
-            ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream("/Users/joshsurette/Desktop/ec504projectgroup8_2.zip"));
-            storeDirectoryAsEntity(dir, zipOutputStream);
-        }
-        catch (FileNotFoundException f) {
-            System.out.println("ERROR2");
-        }
-        
+        File dir = new File("/Users/joshsurette/Desktop/ec504projectgroup8_2");
+        storeDirectoryAsEntity(dir,"/Users/joshsurette/Desktop/ec504.zip");
+
     }
 
 }
