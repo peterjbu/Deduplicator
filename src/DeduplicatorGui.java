@@ -131,11 +131,13 @@ class Task extends SwingWorker<Void, Void> {
         progressBar.setStringPainted(true);
 
         taskOutput = new JTextArea(5, 20);
+        taskOutput.setBackground(Color.WHITE);
         taskOutput.setMargin(new Insets(5,5,5,5));
         taskOutput.setEditable(false);
 
         JPanel panel = new JPanel();
-        //panel.add(openButton);
+        panel.setBackground(Color.DARK_GRAY);
+
         panel.add(newLocker);
         panel.add(startButton);
         panel.add(deleteButton);
@@ -144,6 +146,8 @@ class Task extends SwingWorker<Void, Void> {
         add(panel, BorderLayout.PAGE_START);
         add(new JScrollPane(taskOutput), BorderLayout.CENTER);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setMinimumSize(new Dimension(500,200));
+        setBackground(Color.PINK);
 
     }
 
