@@ -6,20 +6,27 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
-import java.util.Random;
+import java.nio.charset.StandardCharsets;
 import java.beans.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 
 public class DeduplicatorGui extends JPanel implements ActionListener, PropertyChangeListener {
 
 private JProgressBar progressBar;
-private JButton startButton, openButton, deleteButton;
+private JButton startButton, openButton, deleteButton, decompressButton;
 private JTextArea taskOutput;
 private Task task;
 private JFileChooser fc;
 private int start = 0;
 private int delete = 0;
-private String fileNames ="";
+private int decompress = 0;
+private File[] fileNames;
+private File referenceFile;
+private File[] deletefileNames;
+
 
 class Task extends SwingWorker<Void, Void> {
     /*
@@ -29,33 +36,67 @@ class Task extends SwingWorker<Void, Void> {
     public Void doInBackground() {
 
         if(start == 1) {
-            Random random = new Random();
-            String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
-            String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
-            int progress = 0;
-            //Initialize progress property.
-            setProgress(0);
-            while (progress < 100) {
-                //Sleep for up to one second.
-                try {
-                    Thread.sleep(random.nextInt(100));
-                } catch (InterruptedException ignore) {}
-                //Make random progress.
-                progress += random.nextInt(10);
-                setProgress(Math.min(progress, 100));
+            referenceFile =  fileNames[0];
+            String ref = referenceFile.getName();
+            try {
+                String referenceContent = new String(Files.readAllBytes(Paths.get(ref)));
+                for (int ii = 1; ii<fileNames.length; ii++){
+                    File current =fileNames[ii];
+                    String currentFile = current.getName();
+                    try {
+                        String curr = new String(Files.readAllBytes(Paths.get(currentFile)));
+                        Compressor compress = new Compressor(referenceContent, curr);
+                    }
+                    catch (IOException ex){
+                        System.out.println("IO exception");
+                    }
+                }
             }
+            catch (IOException ex){
+                System.out.println("IO exception");
+            }
+
+//            int progress = 0;
+//            //Initialize progress property.
+//            setProgress(0);
+//            while (progress < 100) {
+//                //Sleep for up to one second.
+//                try {
+//                    Thread.sleep(random.nextInt(100));
+//                } catch (InterruptedException ignore) {}
+//                //Make random progress.
+//                progress += random.nextInt(10);
+//                setProgress(Math.min(progress, 100));
+//            }
 
             start = 0;
         }
         else if (delete == 1){
             //Delete()
-                //Sleep for up to one second.
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignore) {
-                }
+            //You can hide the file if you start it off with a . ex =  .filename.txt
+            //if it is the first file, then hide it, otherwise delete
+
+
                 //add a variable to compressor that has the max number for each file and just use this
                 delete = 0;
+        }
+        else if(decompress == 1){
+            String reference = "";
+            String test = "";
+            referenceFile =  fileNames[0];
+            String ref = referenceFile.getName();
+
+            try {
+                reference = new String(Files.readAllBytes(Paths.get("file1_test.txt")), StandardCharsets.UTF_8);
+                test = new String(Files.readAllBytes(Paths.get("file2_test.txt")), StandardCharsets.UTF_8);
+            }
+            catch (IOException e){
+                System.out.println("IO exception");
+            }
+
+            Decompressor D = new Decompressor(reference, test);
+            System.out.println(D.getDecompressed());
+            decompress = 0;
         }
         return null;
     }
@@ -68,9 +109,23 @@ class Task extends SwingWorker<Void, Void> {
         Toolkit.getDefaultToolkit().beep();
         startButton.setEnabled(true);
         setCursor(null); //turn off the wait cursor
-        if(!fileNames.equals("")){
-            taskOutput.append(fileNames + "\n");
+        if (start ==1 ) {
+            if (!(fileNames.length == 0)) {
+                for (int i = 0; i < fileNames.length; i++) {
+                    taskOutput.append(fileNames[i].getName() + "\n");
+                }
             }
+            start =0;
+        }
+        else if (delete==1){//delete explanations
+            if (!(deletefileNames.length == 0)) {
+                for (int i = 0; i < fileNames.length; i++) {
+                    taskOutput.append(fileNames[i].getName() + "\n");
+                }
+                taskOutput.append("Files Deleted!! \n");
+            }
+            delete =0;
+        }
         taskOutput.append("Done!\n");
     }
 }
@@ -86,6 +141,10 @@ class Task extends SwingWorker<Void, Void> {
         deleteButton = new JButton( "Delete File");
         deleteButton.setActionCommand("delete");
         deleteButton.addActionListener(this);
+
+        decompressButton = new JButton("Decompress Files");
+        decompressButton.setActionCommand("decompress");
+        decompressButton.addActionListener(this);
 
         fc = new JFileChooser();
         fc.setMultiSelectionEnabled(true);
@@ -104,6 +163,7 @@ class Task extends SwingWorker<Void, Void> {
         panel.add(openButton);
         panel.add(startButton);
         panel.add(deleteButton);
+        panel.add(decompressButton);
         panel.add(progressBar);
 
         add(panel, BorderLayout.PAGE_START);
@@ -124,20 +184,27 @@ class Task extends SwingWorker<Void, Void> {
 
         if (evt.getSource() == deleteButton){
             delete = 1;
+            int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
+
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File[] files = fc.getSelectedFiles();
+                deletefileNames = files;
+                //This is where a real application would open the file
+            }
             System.out.println("delete");
+        }
+
+        if(evt.getSource() == decompressButton){
+            decompress = 1;
         }
 
         if (evt.getSource() == openButton) {
             int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-               File[] file = fc.getSelectedFiles();
-               for (int ii = 0; ii<file.length; ii++){
-                   File current =file[ii];
-                   fileNames += current.getName() + "\n";
-               }
+               File[] files = fc.getSelectedFiles();
+               fileNames = files;
                 //This is where a real application would open the file
-                System.out.println(fileNames);
             }
         }
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
