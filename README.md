@@ -42,15 +42,18 @@ There are two sources of metadata that allow for the proper compression/decompre
 anchorStartIndex/anchorEndIndex refer to the begin and end indexes of a substring of the anchor file. filenameIndex is the index of the compressed file to add this substring.
 
 #### Example:
-.anchor: "helloworld"
+##### .anchor:
+"helloworld"
 
-helloworld.txt: "hello1world2"
+##### helloworld.txt:
+"hello1world2"
 
-helloworld.txt.meta:
+##### helloworld.txt.meta:
 -   `0:[0, 5], // place "hello" in index 0 of helloworld.txt.dedup`
 -   `6:[6, 10],	// place "world" in index 6 of helloworld.txt.dedup`
 
-helloworld.txt.dedup: 12
+##### helloworld.txt.dedup:
+12
 
 Notes:
 -   We chose to use the contents of the first file added to a locker as our .anchor content because it allowed for a trivial implementation of compression and file deletion.
