@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.*;
 import java.util.regex.Pattern;
-import java.util.Base64;
 import java.util.zip.*;
 
 public class Compressor{
@@ -53,16 +52,10 @@ public class Compressor{
 
         ArrayList<Integer> temp = new ArrayList<Integer>();
 
-        System.out.println("Starting replacements");
+        int index = file2.indexOf(currentLcs);//index of the longest common substring
+        temp.add(index);//add lcsList index into the list of indexes
+        file2 = file2.replaceFirst(Pattern.quote(currentLcs), "");//replace first lcsList in the string with "" empty string
 
-//        while(file2.contains(currentLcs)) {
-            int index = file2.indexOf(currentLcs);//index of the longest common substring
-            temp.add(index);//add lcsList index into the list of indexes
-            System.out.println(file2.length());
-            file2 = file2.replaceFirst(Pattern.quote(currentLcs), "");//replace first lcsList in the string with "" empty string
-            System.out.println(file2.length());
-
-//        }
         indexes.add(temp);
 
         System.out.println("Ending replacements");

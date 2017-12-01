@@ -21,6 +21,8 @@ Example usage:
 
 Please ensure you are in branch "e_dev".
 
-The repository contains a jar file `Compressor.jar`
+The repository contains a jar file `Compressor.jar` and `DepublicatorGui.jar`
 
-This .jar should be run using `java -jar Compressor.jar <args>`. The <args> supplied will be dependent on the functionality to be used.
+To run the CLI, the `Compressor.jar` file should be run using `java -jar Compressor.jar <args>`. The <args> supplied will be dependent on the functionality to be used.
+
+To run the GUI, simply double click or otherwise execute `DepublicatorGui.jar`

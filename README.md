@@ -25,6 +25,20 @@ The command line serves as the entry point for the program. A user can enter spe
 
 #### Suffix Tree Compression:
 
+The Suffix Tree is a variation of a trie, and allows you to find the Longest Common Substring in linear time using Ukkonens algorithm. Suffix Trees follow the rule that no two edges comign out of the same node can start with the same character. If we encounter this, we simply split the edges, and can later on traverse on these splits to extrapolate the longest common substrings.
+
+Ukkonens algorithm can create this data structure in O(m+n) time, where m is the length of string 1 and n is the length of string 2. It does so by maintaining an active point:
+
+Active Edge: keeps track of the character we need to split on
+Active Node: keeps track of the node we need to initiate a split from
+Active Length: keeps track of the length of the edge we have found to already have starting edges
+
+This active point allows us to only initiate splits when absolutely necessary, and follows an implicit insert pattern. This is where our linearity comes from. From here, we can thentraverse the tree and look for the deepest depth weighted by the Nodes where the values are present in each string. This is precisely how we get our longest common substring in linear time which would afford us efficiency and high levels of compression.
+
+Sources Used for Reference in Implementation:
+https://stackoverflow.com/questions/9452701/ukkonens-suffix-tree-algorithm-in-plain-english
+https://github.com/kasramvd/SuffixTree/blob/master/SuffixTree/suffixtree.py
+http://www.geeksforgeeks.org/suffix-tree-application-5-longest-common-substring-2/
 
 #### Compression Metadata:
 
@@ -92,3 +106,10 @@ The decompression of a file is made possible by utilizing the .anchor file, and 
     -   Decompress
         - Go to the locker that contains the files that you would like to decompress
         - Select any files that you would like to decompress
+
+
+CONRAD LIU 12/1/2017
+KHAI PHAN 12/1/2017
+ESEN HARRIS 12/1/2017
+JOSH SURETTE 12/1/2017
+PETER JANG 12/1/2017
