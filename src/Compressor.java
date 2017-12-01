@@ -50,7 +50,7 @@ public class Compressor{
         }
         indexes.add(temp);
 
-        if (file2.length() > 4) {
+        if (file2.length() > 8) {
             compress(file1, file2);
         }
         /** the data required to reconstruct the file based off of the reference file is appended to the
@@ -159,6 +159,7 @@ public class Compressor{
         String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
 //        String file1_test = "hellomynameisConrad";
 //        String file2_test = "hellomynameisPeterhellomynameisJosh";
+
 
         Compressor L12 = new Compressor(file1_test, file2_test);
 
