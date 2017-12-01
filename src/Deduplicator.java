@@ -8,13 +8,22 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * This class serves as the entry point to our Deduplicator app. It supports two arguments: -addFile, -locker
+ * The -addFile command adds the file in question to the locker location as the argument to the -locker flag.
+ * A user cannot add a file without supplying a locker location. However, a user CAN supply a locker location with no
+ * -addFile flag, akin to initializing an empty locker.
+ */
+
 public class Deduplicator {
 
     public static void main(String[] args) {
 
-        initialize(args);
+        /**
+         * All flags that can be added as args to the command line
+         */
 
-        final List argList = Arrays.asList("-addFile", "-locker");
+        final List argList = Arrays.asList("-addFile", "-locker", "-retrieve", "-dest");
         Map<String, String> optionsMap = new HashMap<String, String>();
 
         for (int i = 0; i < args.length; i++) {
@@ -32,74 +41,82 @@ public class Deduplicator {
             }
         }
 
+        if (optionsMap.get("-retrieve") != null && optionsMap.get("-dest") != null) {
+            retrieve(optionsMap.get("-retrieve"), optionsMap.get("-dest"));
+        }
+
+        /**
+         * Initialize a locker with a .fileList file.
+         */
+
+        if (optionsMap.get("-locker") != null) {
+            String lockerPath = optionsMap.get("-locker");
+
+            File dirPath = new File(lockerPath);
+            if (!dirPath.exists()) {
+                boolean success = dirPath.mkdir();
+                if (!success) {
+                    throw new IllegalArgumentException("Unable to create locker at" + lockerPath);
+                }
+                initialize(lockerPath);
+            }
+        }
+
+        /**
+         * Add a file to the specified locker location
+         */
+
         if (optionsMap.get("-addFile") != null) {
             if (optionsMap.get("-locker") != null) {
-                String lockerPath = "lockers/" + optionsMap.get("-locker");
+                String lockerPath = optionsMap.get("-locker");
+
                 File dirPath = new File(lockerPath);
                 if (!dirPath.exists()) {
                     boolean success = dirPath.mkdir();
                     if (!success) {
-                        throw new IllegalArgumentException("Unable to create locker " + optionsMap.get("-locker"));
+                        throw new IllegalArgumentException("Unable to create locker at" + lockerPath);
                     }
+                    initialize(lockerPath);
                 }
                 String fileContents = "";
                 String filePath = optionsMap.get("-addFile");
                 String[] directories = filePath.split("/");
                 String fileName = directories[directories.length - 1];
-                String newFileContent = "";
-
                 fileContents = readFrom(filePath);
+                String fileListContents = readFrom(lockerPath + "/.fileList");
+                String reference = fileListContents.split(",")[0];
 
-                String fileListContents = readFrom(".fileList");
+                /**
+                 * If this is the first file added to the locker, use it as the reference file for compression
+                 * Otherwise, obtain contents in reference file and use it to compress file
+                 */
 
-                String[] splitContents = fileListContents.split(System.getProperty("line.separator"));
-                String[] temp = splitContents[0].split(",");
-                String reference = splitContents[0].split(",")[1];
-                String locker = splitContents[0].split(",")[2];
-
-
-                if (firstFile()) {
+                if (firstFile(lockerPath)) {
                     // store uncompressed
-                    String newFile = lockerPath + "/" + fileName;
+                    String newFilePath = lockerPath + "/" + fileName + ".dedup";
 
                     // creates the file to locker
-                    writeTo(newFile, fileContents);
-
-                    // Updates fileList metadata
-                    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(".fileList"), "utf-8")))
-                    {
-                        String newContents = "1," + fileName + "," + optionsMap.get("-locker") + "\n" + fileName + ":" + optionsMap.get("-locker");
-                        writer.write(newContents);
-                    }
-                    catch (IOException e){
-                        System.out.println("Unable to read input file");
-                    }
+                    writeTo(newFilePath, fileContents);
+                    writeTo(lockerPath + "/" + ".fileList", fileName + ".dedup");
                 }
                 else {
-                    String referenceFileContent = readFrom("lockers/" + locker + "/" + reference);
+                    String referenceFileContent = readFrom(lockerPath + "/" + reference );
+
                     // compress with reference file
                     Compressor comp = new Compressor(referenceFileContent, fileContents);
                     String compressedText = comp.getCompressed();
-                    writeTo("lockers/" + locker + "/" + fileName, compressedText);
+                    String metaContents = comp.getMeta();
+                    writeTo(lockerPath + "/" + fileName + ".meta", metaContents);
+                    writeTo(lockerPath + "/" + fileName + ".dedup", compressedText);
+                    String updatedFileListContent = "," + fileName + ".dedup";
 
-                    //update the fileListContents .fileList by incrementing the counter and adding fileName and locker
-                    try
-                    {
-                        newFileContent = "," + fileName + ":" + optionsMap.get("-locker");
-
-                        Files.write(Paths.get(".fileList"), newFileContent.getBytes(), StandardOpenOption.APPEND);
-                    }catch (IOException e)
-                    {
+                    try {
+                        Files.write(Paths.get(lockerPath + "/.fileList"), updatedFileListContent.getBytes(), StandardOpenOption.APPEND);
+                    }
+                    catch (IOException e) {
                         System.out.println("Unable to append file");
                     }
-
                 }
-
-
-
-                // locker name already exists, proceed to extract text from file, compress into locker
-                // Call compression algorithm with filename optionsMap.get("-addFile")
-                // and locker location optionsMap.get("-locker")
             }
             else {
                 throw new IllegalArgumentException("Must provide locker name to store file in");
@@ -107,57 +124,83 @@ public class Deduplicator {
         }
     }
 
-    private static void initialize(String[] args) {
-        if (args.length == 0) {
-            throw new IllegalArgumentException("Cannot provide empty arguments");
-        }
+    /**
+     * Initializes a locker location with an empty .fileList file
+     * @param folderPath: the folder path to add the new .fileList into
+     */
+    private static void initialize(String folderPath) {
 
-
-        File fileList = new File(".fileList");
-        File lockerDir = new File("lockers");
+        File fileList = new File(folderPath + "/.fileList");
 
         if (!fileList.exists()) {
-            writeTo(".fileList", "0, , ");
-        }
-
-        if (!lockerDir.exists()) {
-            boolean success = lockerDir.mkdir();
-            if (!success) {
-                throw new IllegalArgumentException("Unable to create locker directory");
-            }
+            writeTo(folderPath + "/.fileList", "");
         }
     }
 
-    private static boolean firstFile() {
+    /**
+     * Checks whether the file to be added to a locker location is the first such file
+     * @param folderPath: the folder path to use
+     * @return True if it is the first file being added, false otherwise
+     */
+    private static boolean firstFile(String folderPath) {
         String fileListContents = "";
 
-        fileListContents = readFrom(".fileList");
+        fileListContents = readFrom(folderPath + "/.fileList");
 
-        String[] splitContents = fileListContents.split(System.getProperty("line.separator"));
-        String[] first = splitContents[0].split(",");
-
-        return first[0].equals("0");
+        return fileListContents.equals("");
     }
 
-    private static void writeTo(String fileName, String contents) {
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "utf-8")))
+
+    /**
+     * Writes contents to a file
+     * @param filePath: The filepath to write to
+     * @param contents: The contents to write into fileName
+     */
+    private static void writeTo(String filePath, String contents) {
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8")))
         {
             writer.write(contents);
         }
         catch (IOException e){
-            System.out.println("unable to store file " + fileName);
+            System.out.println("Unable to store file " + filePath);
         }
     }
 
+    /**
+     * Reads contents from a file
+     * @param filePath: The file to read from
+     * @return A String object consisting of the contents in filePath
+     */
     private static String readFrom(String filePath){
         String fileContents = "";
         try {
             fileContents =  new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
         }
         catch (IOException e){
-            System.out.println("Unable to read input file");
+            e.printStackTrace();
         }
         return fileContents;
     }
+
+    private static void retrieve(String filePath, String dest) {
+        String lockerPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        String fileName = filePath.substring(filePath.lastIndexOf('/'));
+        String metaPath = filePath.substring(0, filePath.lastIndexOf(".")) + ".meta";
+        String fileListContents = readFrom(lockerPath + "/.fileList");
+        String referenceContents = readFrom(lockerPath + "/" + fileListContents.split(",")[0]);
+        String compressedContents = readFrom(filePath);
+        String metaContents = readFrom(metaPath);
+        String decompressed = new Decompressor(referenceContents, compressedContents, metaContents).getDecompressed();
+        fileName.substring(0, fileName.lastIndexOf("."));
+        writeTo(dest + "/" + fileName.substring(0, fileName.lastIndexOf(".")), decompressed);
+    }
+
+//    private static long getFileSize(File file){
+//        try {
+//            return file.length();
+//        } catch(Exception e) {
+//            System.out.println("Unable to get file size");
+//        }
+//    }
 
 }

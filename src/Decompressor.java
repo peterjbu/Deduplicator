@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,11 +15,11 @@ public class Decompressor {
     private ArrayList<Integer> indexes; //indexes of where the most common substring is
     private ArrayList<ArrayList<Integer>> lcsList;
 
-    public Decompressor(String referenceFile, String compressedFile){
+    public Decompressor(String referenceFile, String compressedFile, String metaContents){
         reference = referenceFile;
-        metadata = compressedFile.split(System.getProperty("line.separator"));
+        metadata = metaContents.split(System.getProperty("line.separator"));
         decompressed = "";
-        compressed = metadata[0];
+        compressed = compressedFile;
         lcsList = new ArrayList<ArrayList<Integer>>();
         indexes = new ArrayList<Integer>();
         decompressor();
@@ -28,7 +27,7 @@ public class Decompressor {
     }
 
     private void filter(){
-        for (int i = metadata.length - 1; i > 0; i--) {
+        for (int i = metadata.length - 1; i >= 0; i--) {
             Pattern p = Pattern.compile("\\[(.*?)\\]");
             Matcher m = p.matcher(metadata[i]);
 
@@ -90,8 +89,8 @@ public class Decompressor {
             System.out.println("IO exception");
         }
 
-        Decompressor D = new Decompressor(reference, test);
-        System.out.println(D.getDecompressed());
+//        Decompressor D = new Decompressor(reference, test);
+//        System.out.println(D.getDecompressed());
 //        for (int i = 0; i < D.metadata.length; i++){
 //            System.out.println(D.metadata[i]);
 //        }
