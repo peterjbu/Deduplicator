@@ -250,6 +250,7 @@ public class Compressor{
         catch (FileNotFoundException f) {
             System.out.println("ERROR2");
         }
+        
     }
 
 }
