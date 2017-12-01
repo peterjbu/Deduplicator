@@ -19,6 +19,7 @@ private Task task;
 private JFileChooser fc;
 private int start = 0;
 private int delete = 0;
+private String fileNames ="";
 
 class Task extends SwingWorker<Void, Void> {
     /*
@@ -29,18 +30,21 @@ class Task extends SwingWorker<Void, Void> {
 
         if(start == 1) {
             Random random = new Random();
+            String file1_test = "helloaynameisesebnhellomynamespeterhellocynameisjosh";
+            String file2_test = "hellomynameisesenhellomynameispeterhellomynameisjosh";
             int progress = 0;
             //Initialize progress property.
             setProgress(0);
             while (progress < 100) {
                 //Sleep for up to one second.
                 try {
-                    Thread.sleep(random.nextInt(1000));
+                    Thread.sleep(random.nextInt(100));
                 } catch (InterruptedException ignore) {}
                 //Make random progress.
                 progress += random.nextInt(10);
                 setProgress(Math.min(progress, 100));
             }
+
             start = 0;
         }
         else if (delete == 1){
@@ -64,6 +68,9 @@ class Task extends SwingWorker<Void, Void> {
         Toolkit.getDefaultToolkit().beep();
         startButton.setEnabled(true);
         setCursor(null); //turn off the wait cursor
+        if(!fileNames.equals("")){
+            taskOutput.append(fileNames + "\n");
+            }
         taskOutput.append("Done!\n");
     }
 }
@@ -72,15 +79,16 @@ class Task extends SwingWorker<Void, Void> {
         super(new BorderLayout());
 
         //Create the demo's UI.
-        startButton = new JButton("Start");
+        startButton = new JButton("DeDuplicator");
         startButton.setActionCommand("start");
         startButton.addActionListener(this);
 
-        deleteButton = new JButton( "Delete");
+        deleteButton = new JButton( "Delete File");
         deleteButton.setActionCommand("delete");
         deleteButton.addActionListener(this);
 
         fc = new JFileChooser();
+        fc.setMultiSelectionEnabled(true);
         openButton = new JButton("Open a File...");
         openButton.addActionListener(this);
 
@@ -123,8 +131,13 @@ class Task extends SwingWorker<Void, Void> {
             int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                //This is where a real application would open the file.
+               File[] file = fc.getSelectedFiles();
+               for (int ii = 0; ii<file.length; ii++){
+                   File current =file[ii];
+                   fileNames += current.getName() + "\n";
+               }
+                //This is where a real application would open the file
+                System.out.println(fileNames);
             }
         }
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -167,6 +180,8 @@ class Task extends SwingWorker<Void, Void> {
         frame.setVisible(true);
     }
 
+
+
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
@@ -176,4 +191,6 @@ class Task extends SwingWorker<Void, Void> {
             }
         });
     }
+
+
 }
