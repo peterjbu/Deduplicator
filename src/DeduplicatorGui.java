@@ -36,51 +36,26 @@ class Task extends SwingWorker<Void, Void> {
      */
     @Override
     public Void doInBackground() {
-
+        Deduplicator deduplicator = new Deduplicator();
         if(start == 1) {
-            System.out.println("start");
-            referenceFile =  fileNames[0];
-            String ref = referenceFile.getName();
-            Deduplicator deduplicator = new Deduplicator();
-            try {
-                int progress = 0;
-                setProgress(0);
-                String referenceContent = new String(Files.readAllBytes(Paths.get(ref)));
-                //System.out.println(dirPath.getAbsolutePath());
-                for (int ii = 0; ii<fileNames.length; ii++){
-                    File current =fileNames[ii];
-                    System.out.println("current file");;
-                    String currentFile = current.getAbsolutePath();
-                    System.out.println(currentFile);
-                    System.out.println("dirPath++ ");
-                    System.out.println(dirPath.getAbsolutePath());
-                    deduplicator.addFile(currentFile, dirPath.getAbsolutePath());
-                }
+            for (int ii = 0; ii<fileNames.length; ii++){
+                File current =fileNames[ii];
+                String currentFile = current.getAbsolutePath();
+                deduplicator.addFile(currentFile, dirPath.getAbsolutePath());
             }
-            catch (IOException ex){
-                System.out.println("IO exception");
-            }
-            start = 0;
         }
         else if (delete == 1){
             //Delete()
-            //You can hide the file if you start it off with a . ex =  .filename.txt
-            //if it is the first file, then hide it, otherwise delete
-
-                //add a variable to compressor that has the max number for each file and just use this
-                delete = 0;
+            System.out.println("print");
+            for(int ii = 0; ii<fileNames.length; ii++){
+                deduplicator.delete(fileNames[ii].getAbsolutePath());
+            }
         }
         else if(decompress == 1){
-            Deduplicator deduplicator = new Deduplicator();
-            System.out.println("Hi here");
-            System.out.println(fileNames.length + "#");
             for (int i = 0; i<fileNames.length; i++) {
                 System.out.println(fileNames[i].getAbsolutePath());
-                deduplicator.retrieve(fileNames[i].getAbsolutePath(), dirPath.getAbsolutePath());
-                }
-
-            //System.out.println(D.getDecompressed());
-            decompress = 0;
+                deduplicator.retrieve(fileNames[i].getAbsolutePath(), fileNames[i].getParent());
+            }
         }
         return null;
     }
@@ -93,28 +68,31 @@ class Task extends SwingWorker<Void, Void> {
         Toolkit.getDefaultToolkit().beep();
         startButton.setEnabled(true);
         setCursor(null); //turn off the wait cursor
-        if (start ==1 ) {
-            if (!(fileNames.length == 0)) {
-                for (int i = 0; i < fileNames.length; i++) {
-                    taskOutput.append(fileNames[i].getName() + "\n");
-                }
+        if (start == 1 ) {
+            taskOutput.append("Compressed Files:");
+            for (int i = 0; i < fileNames.length; i++) {
+                taskOutput.append(fileNames[i].getName() + "\n");
             }
+            taskOutput.append("In Locker "+ dirPath + "\n");
             start =0;
         }
-        else if (delete==1){//delete explanations
-            if (!(deletefileNames.length == 0)) {
-                for (int i = 0; i < fileNames.length; i++) {
-                    taskOutput.append(fileNames[i].getName() + "\n");
-                }
-                taskOutput.append("Files Deleted!! \n");
-            }
+       if (delete==1){//delete explanations
+
+           for (int i = 0; i < fileNames.length; i++) {
+               taskOutput.append(fileNames[i].getName() + "\n");
+               taskOutput.append("Files Deleted!! \n");
+           }
             delete =0;
         }
-        else if (decompress ==1){
-            taskOutput.append("Decompressed Files! \n");
+      if (decompress ==1){
+            System.out.println("hell0");
+            taskOutput.append("Decompressed Files in Locker with path " +fileNames[0].getParent() +"\n");
+            for (int i = 0; i<fileNames.length; i++) {
+                taskOutput.append(fileNames[i].getAbsolutePath()+"\n");
+            }
             decompress = 0;
         }
-        else if (newlocker==1){
+      if (newlocker==1){
             taskOutput.append("New locker at path " + dirPath.getAbsolutePath() + "\n");
             newlocker = 0;
         }
@@ -162,8 +140,7 @@ class Task extends SwingWorker<Void, Void> {
         panel.add(startButton);
         panel.add(deleteButton);
         panel.add(decompressButton);
-        panel.add(progressBar);
-
+       // panel.add(progressBar);
         add(panel, BorderLayout.PAGE_START);
         add(new JScrollPane(taskOutput), BorderLayout.CENTER);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -176,6 +153,7 @@ class Task extends SwingWorker<Void, Void> {
     public void actionPerformed(ActionEvent evt) {
         startButton.setEnabled(false);
         if (evt.getSource() == startButton){
+            fc.setDialogTitle("Select Files to be Deduplicated");
             int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File[] files = fc.getSelectedFiles();
@@ -189,17 +167,18 @@ class Task extends SwingWorker<Void, Void> {
             int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File[] files = fc.getSelectedFiles();
-                deletefileNames = files;
+                fileNames = files;
                 //This is where a real application would open the file
             }
             delete = 1;
         }
 
         else if(evt.getSource() == decompressButton) {
+            fc.setDialogTitle("Select the '.depup' to decompress them");
             int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File[] files = fc.getSelectedFiles();
-                deletefileNames = files;
+                fileNames = files;
                 //This is where a real application would open the file
             }
             decompress = 1;
@@ -219,7 +198,6 @@ class Task extends SwingWorker<Void, Void> {
             }
             newlocker=1;
         }
-
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         //Instances of javax.swing.SwingWorker are not reusuable, so
         //we create new instances as needed.

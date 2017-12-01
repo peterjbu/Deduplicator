@@ -2,10 +2,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * This class serves as the entry point to our Deduplicator app. It supports two arguments: -addFile, -locker
@@ -22,7 +19,7 @@ public class Deduplicator {
          * All flags that can be added as args to the command line
          */
 
-        final List argList = Arrays.asList("-addFile", "-locker", "-retrieve", "-dest");
+        final List argList = Arrays.asList("-addFile", "-locker", "-retrieve", "-dest", "-delete", "-getStats");
         Map<String, String> optionsMap = new HashMap<String, String>();
 
         for (int i = 0; i < args.length; i++) {
@@ -67,6 +64,16 @@ public class Deduplicator {
                 throw new IllegalArgumentException("Must provide locker name to store file in");
             }
         }
+
+        if (optionsMap.get("-delete") != null){
+            String filePath = optionsMap.get("-delete");
+            delete(filePath);
+        }
+
+        if (optionsMap.get("-getStats") != null){
+            String lockerPath = optionsMap.get("-getStats");
+            getStats(lockerPath);
+        }
     }
 
     /**
@@ -106,7 +113,7 @@ public class Deduplicator {
             fileContents =  new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
         }
         catch (IOException e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return fileContents;
     }
@@ -115,7 +122,7 @@ public class Deduplicator {
      * Creates locker
      * @param lockerPath: creates locker at this location
      */
-    private static void createLocker(String lockerPath){
+    public static void createLocker(String lockerPath){
         File dirPath = new File(lockerPath);
         if (!dirPath.exists()) {
             boolean success = dirPath.mkdir();
@@ -127,8 +134,8 @@ public class Deduplicator {
 
     /**
      * Adds file to locker
-     * @param filePath: The file to add
-     * @param lockerPath: The locker to add file to
+     * @param filePath: The path of the file to add
+     * @param lockerPath: The path of the locker to add file to
      */
     public static void addFile(String filePath, String lockerPath){
         File dirPath = new File(lockerPath);
@@ -165,6 +172,13 @@ public class Deduplicator {
         }
     }
 
+
+    /**
+     * retrieves compressed file from locker and saves decompressed version to destination
+     * @param filePath: Source of target compressed file
+     * @param dest: Destination path of decompressed file
+     */
+
     public static void retrieve(String filePath, String dest) {
         String lockerPath = filePath.substring(0, filePath.lastIndexOf('/'));
         String fileName = filePath.substring(filePath.lastIndexOf('/'));
@@ -176,12 +190,49 @@ public class Deduplicator {
         writeTo(dest + "/" + fileName.substring(0, fileName.lastIndexOf(".")), decompressed);
     }
 
-//    private static long getFileSize(File file){
-//        try {
-//            return file.length();
-//        } catch(Exception e) {
-//            System.out.println("Unable to get file size");
-//        }
-//    }
+    /**
+     * deletes files specified in filepath. To delete compressed file, delete .dedup extension.
+     * @param filePath: Path of file to be deleted
+     */
+    public static void delete(String filePath){
+        File dedupFile = new File(filePath);
+        File metaFile = new File(filePath.substring(0, filePath.lastIndexOf(".")) + ".meta");
+        if(!dedupFile.delete()){
+            throw new IllegalArgumentException("Cannot delete dedup file");
+        }
+        if (!metaFile.delete()) {
+            throw new IllegalArgumentException("Cannot delete meta file");
+        }
+    }
+
+
+    /**
+     * prints out the size of the a directory
+     * @param lockerPath: the path of the directory
+     */
+    private static void getStats(String lockerPath){
+        long length = 0;
+        ArrayList<Long> fileSize = new ArrayList<Long>();
+        ArrayList<String> fileName = new ArrayList<String>();
+        File locker = new File(lockerPath);
+        try {
+            for (File file : locker.listFiles()) {
+                if (file.isFile()) {
+                    length += file.length();
+                    fileSize.add(file.length());
+                    fileName.add(file.getAbsolutePath());
+                }
+//                else
+//                    length += locker(file);
+            }
+        } catch(NullPointerException e){
+            e.printStackTrace();
+        }
+
+        System.out.println("Size of directory: " + length);
+        for (int i = 0; i < fileSize.size(); i++){
+            System.out.println("Size of " + fileName.get(i) + " : " + fileSize.get(i));
+        }
+    }
 
 }
