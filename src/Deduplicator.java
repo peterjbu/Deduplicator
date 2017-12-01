@@ -105,6 +105,8 @@ public class Deduplicator {
                     // compress with reference file
                     Compressor comp = new Compressor(referenceFileContent, fileContents);
                     String compressedText = comp.getCompressed();
+                    String metaContents = comp.getMeta();
+                    writeTo(lockerPath + "/" + fileName + ".meta", metaContents);
                     writeTo(lockerPath + "/" + fileName + ".dedup", compressedText);
                     String updatedFileListContent = "," + fileName + ".dedup";
 
@@ -183,10 +185,12 @@ public class Deduplicator {
     private static void retrieve(String filePath, String dest) {
         String lockerPath = filePath.substring(0, filePath.lastIndexOf('/'));
         String fileName = filePath.substring(filePath.lastIndexOf('/'));
+        String metaPath = filePath.substring(0, filePath.lastIndexOf(".")) + ".meta";
         String fileListContents = readFrom(lockerPath + "/.fileList");
         String referenceContents = readFrom(lockerPath + "/" + fileListContents.split(",")[0]);
         String compressedContents = readFrom(filePath);
-        String decompressed = new Decompressor(referenceContents, compressedContents).getDecompressed();
+        String metaContents = readFrom(metaPath);
+        String decompressed = new Decompressor(referenceContents, compressedContents, metaContents).getDecompressed();
         fileName.substring(0, fileName.lastIndexOf("."));
         writeTo(dest + "/" + fileName.substring(0, fileName.lastIndexOf(".")), decompressed);
     }

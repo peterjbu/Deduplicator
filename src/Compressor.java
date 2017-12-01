@@ -3,6 +3,7 @@ import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.*;
+import java.util.regex.Pattern;
 
 public class Compressor{
     private ArrayList<ArrayList<Integer>> indexes;//indexes of where the most common substring is
@@ -11,6 +12,8 @@ public class Compressor{
     private String uneditedFile;
     private String referenceFile;
     private String fileToCompress;
+    private String meta;
+    private int count = 0;
 
     //constructor for LCScompression
     Compressor(String reference, String file2){
@@ -20,18 +23,28 @@ public class Compressor{
         this.uneditedFile = "";
         referenceFile = reference;
         fileToCompress = file2;
+        uneditedFile = file2;
+        meta = "";
+//        callCompress();
         compress(referenceFile, fileToCompress);
     }
 
-    private String compress(String file1, String file2){
+    private void callCompress() {
+        String file2 = "";
+        for (int i = 0; i < 3; i++) {
+            file2 = compressed;
+            compress(referenceFile, file2);
+        }
+    }
 
-        uneditedFile = file2;
+    private String compress(String file1, String file2){
 
         ArrayList<Integer> subIndex = new ArrayList<Integer>();
 
         //concatenate two files and build suffix tree to
         //find longest common substring of file1 and file2; hardcoded in for now.
-        String currentLcs = findLCS(file1, file2);
+        SuffixTree tree = new SuffixTree(file1, file2);
+        String currentLcs = tree.getLCS();
 
         int startingIndex = file1.indexOf(currentLcs);
         int endingIndex = startingIndex + currentLcs.length();
@@ -43,14 +56,25 @@ public class Compressor{
 
         ArrayList<Integer> temp = new ArrayList<Integer>();
 
-        while(file2.contains(currentLcs)) {
+        System.out.println("Starting replacements");
+
+//        while(file2.contains(currentLcs)) {
             int index = file2.indexOf(currentLcs);//index of the longest common substring
             temp.add(index);//add lcsList index into the list of indexes
-            file2 = file2.replaceFirst(currentLcs, "");//replace first lcsList in the string with "" empty string
-        }
+            System.out.println(file2.length());
+            file2 = file2.replaceFirst(Pattern.quote(currentLcs), "");//replace first lcsList in the string with "" empty string
+            System.out.println(file2.length());
+
+//        }
         indexes.add(temp);
 
-        if (file2.length() > 8) {
+        System.out.println("Ending replacements");
+
+        if (count < 3) {
+            count++;
+            tree.killTree();
+            tree = null;
+            System.gc();
             compress(file1, file2);
         }
         /** the data required to reconstruct the file based off of the reference file is appended to the
@@ -62,12 +86,14 @@ public class Compressor{
          **/
         else {
             for (int i = 0; i < indexes.size(); i++) {
-                file2 += "\n";
                 for (int j = 0; j < indexes.get(i).size(); j++) {
-                    file2 += indexes.get(i).get(j);
-                    file2 += ":";
-                    file2 += lcsList.get(i);
-                    file2 += ",";
+                    meta += indexes.get(i).get(j);
+                    meta += ":";
+                    meta += lcsList.get(i);
+                    meta += ",";
+                }
+                if (i != indexes.size() - 1) {
+                    meta += "\n";
                 }
             }
             this.compressed = file2;
@@ -78,6 +104,10 @@ public class Compressor{
 
     public String getCompressed(){
         return compressed;
+    }
+
+    public String getMeta() {
+        return meta;
     }
 
 //    public String decompress(String compressedFile){
