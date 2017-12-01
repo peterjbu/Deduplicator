@@ -2,7 +2,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
@@ -51,15 +50,7 @@ public class Deduplicator {
 
         if (optionsMap.get("-locker") != null) {
             String lockerPath = optionsMap.get("-locker");
-
-            File dirPath = new File(lockerPath);
-            if (!dirPath.exists()) {
-                boolean success = dirPath.mkdir();
-                if (!success) {
-                    throw new IllegalArgumentException("Unable to create locker at" + lockerPath);
-                }
-                initialize(lockerPath);
-            }
+            createLocker(lockerPath);
         }
 
         /**
@@ -68,72 +59,13 @@ public class Deduplicator {
 
         if (optionsMap.get("-addFile") != null) {
             if (optionsMap.get("-locker") != null) {
-                String lockerPath = optionsMap.get("-locker");
-
-                File dirPath = new File(lockerPath);
-                if (!dirPath.exists()) {
-                    boolean success = dirPath.mkdir();
-                    if (!success) {
-                        throw new IllegalArgumentException("Unable to create locker at" + lockerPath);
-                    }
-                    initialize(lockerPath);
-                }
-                String fileContents = "";
                 String filePath = optionsMap.get("-addFile");
-                String[] directories = filePath.split("/");
-                String fileName = directories[directories.length - 1];
-                fileContents = readFrom(filePath);
-                String fileListContents = readFrom(lockerPath + "/.fileList");
-                String reference = fileListContents.split(",")[0];
-
-                /**
-                 * If this is the first file added to the locker, use it as the reference file for compression
-                 * Otherwise, obtain contents in reference file and use it to compress file
-                 */
-
-                if (firstFile(lockerPath)) {
-                    // store uncompressed
-                    String newFilePath = lockerPath + "/" + fileName + ".dedup";
-
-                    // creates the file to locker
-                    writeTo(newFilePath, fileContents);
-                    writeTo(lockerPath + "/" + ".fileList", fileName + ".dedup");
-                }
-                else {
-                    String referenceFileContent = readFrom(lockerPath + "/" + reference );
-
-                    // compress with reference file
-                    Compressor comp = new Compressor(referenceFileContent, fileContents);
-                    String compressedText = comp.getCompressed();
-                    String metaContents = comp.getMeta();
-                    writeTo(lockerPath + "/" + fileName + ".meta", metaContents);
-                    writeTo(lockerPath + "/" + fileName + ".dedup", compressedText);
-                    String updatedFileListContent = "," + fileName + ".dedup";
-
-                    try {
-                        Files.write(Paths.get(lockerPath + "/.fileList"), updatedFileListContent.getBytes(), StandardOpenOption.APPEND);
-                    }
-                    catch (IOException e) {
-                        System.out.println("Unable to append file");
-                    }
-                }
+                String lockerPath = optionsMap.get("-locker");
+                addFile(filePath, lockerPath);
             }
             else {
                 throw new IllegalArgumentException("Must provide locker name to store file in");
             }
-        }
-    }
-
-    /**
-     * Initializes a locker location with an empty .fileList file
-     * @param folderPath: the folder path to add the new .fileList into
-     */
-    private static void initialize(String folderPath) {
-
-        File fileList = new File(folderPath + "/.fileList");
-
-        if (!fileList.exists()) {
-            writeTo(folderPath + "/.fileList", "");
         }
     }
 
@@ -143,11 +75,8 @@ public class Deduplicator {
      * @return True if it is the first file being added, false otherwise
      */
     private static boolean firstFile(String folderPath) {
-        String fileListContents = "";
-
-        fileListContents = readFrom(folderPath + "/.fileList");
-
-        return fileListContents.equals("");
+        File anchorFile = new File(folderPath + "/.anchor");
+        return !anchorFile.exists();
     }
 
 
@@ -182,16 +111,68 @@ public class Deduplicator {
         return fileContents;
     }
 
+    /**
+     * Creates locker
+     * @param lockerPath: creates locker at this location
+     */
+    private static void createLocker(String lockerPath){
+        File dirPath = new File(lockerPath);
+        if (!dirPath.exists()) {
+            boolean success = dirPath.mkdir();
+            if (!success) {
+                throw new IllegalArgumentException("Unable to create locker at" + lockerPath);
+            }
+        }
+    }
+
+    /**
+     * Adds file to locker
+     * @param filePath: The file to add
+     * @param lockerPath: The locker to add file to
+     */
+    private static void addFile(String filePath, String lockerPath){
+        File dirPath = new File(lockerPath);
+        if (!dirPath.exists()) {
+            boolean success = dirPath.mkdir();
+            if (!success) {
+                throw new IllegalArgumentException("Unable to create locker at" + lockerPath);
+            }
+        }
+        String fileContents = "";
+        String[] directories = filePath.split("/");
+        String fileName = directories[directories.length - 1];
+        fileContents = readFrom(filePath);
+
+        /**
+         * If this is the first file added to the locker, use it as the reference file for compression
+         * Otherwise, obtain contents in reference file and use it to compress file
+         */
+
+        if (firstFile(lockerPath)) {
+            writeTo(lockerPath + "/" + ".anchor", fileContents);
+            writeTo(lockerPath + "/" + fileName + ".dedup", "");
+            writeTo(lockerPath + "/" + fileName + ".meta", "0:[0, " + fileContents.length() + "],");
+        }
+        else {
+            String referenceFileContent = readFrom(lockerPath + "/" + ".anchor");
+
+            // compress with reference file
+            Compressor comp = new Compressor(referenceFileContent, fileContents);
+            String compressedText = comp.getCompressed();
+            String metaContents = comp.getMeta();
+            writeTo(lockerPath + "/" + fileName + ".meta", metaContents);
+            writeTo(lockerPath + "/" + fileName + ".dedup", compressedText);
+        }
+    }
+
     private static void retrieve(String filePath, String dest) {
         String lockerPath = filePath.substring(0, filePath.lastIndexOf('/'));
         String fileName = filePath.substring(filePath.lastIndexOf('/'));
         String metaPath = filePath.substring(0, filePath.lastIndexOf(".")) + ".meta";
-        String fileListContents = readFrom(lockerPath + "/.fileList");
-        String referenceContents = readFrom(lockerPath + "/" + fileListContents.split(",")[0]);
+        String anchorContents = readFrom(lockerPath + "/.anchor");
         String compressedContents = readFrom(filePath);
         String metaContents = readFrom(metaPath);
-        String decompressed = new Decompressor(referenceContents, compressedContents, metaContents).getDecompressed();
-        fileName.substring(0, fileName.lastIndexOf("."));
+        String decompressed = new Decompressor(anchorContents, compressedContents, metaContents).getDecompressed();
         writeTo(dest + "/" + fileName.substring(0, fileName.lastIndexOf(".")), decompressed);
     }
 
