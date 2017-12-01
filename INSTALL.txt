@@ -1,28 +1,31 @@
-### INSTALL INSTRUCTIONS
+INSTALL INSTRUCTIONS:
+---------------------
 
-#### Pre-conditions:
 
+PRE-CONDITIONS:
+---------------
 Operating system: macOS Sierra and Java 8
 
-#### Supporting Files:
 
+SUPPORTING FILES:
+-----------------
 Example usage:
 
 1) java -jar Compressor.jar -addFile file1_test.txt -locker MYLOCKER
--   Program will initialize MYLOCKER directory to be a locker, and create the directory if it doesn't exist
--   The contents of file1_test.txt will now be used in .anchor
--   file1_test.txt.dedup contains the compressed contents of file1_test.txt
+    - Program will initialize MYLOCKER directory to be a locker, and create the directory if it doesn't exist
+    - The contents of file1_test.txt will now be used in .anchor
+    - file1_test.txt.dedup contains the compressed contents of file1_test.txt
 2) java -jar Compressor.jar -addFile file3_test.txt -locker MYLOCKER
--   Program will compress file3_test.txt using contents in .anchor
+    - Program will compress file3_test.txt using contents in .anchor
 3) java -jar Compressor.jar -getStats MYLOCKER
--   Retrieves storage statistics for locker MYLOCKER
+    - Retrieves storage statistics for locker MYLOCKER
 
-#### Execution:
+
+EXECUTION:
+----------
 
 Please ensure you are in branch "e_dev".
-
 The repository contains a jar file `Compressor.jar` and `DepublicatorGui.jar`
 
 To run the CLI, the `Compressor.jar` file should be run using `java -jar Compressor.jar <args>`. The <args> supplied will be dependent on the functionality to be used.
-
 To run the GUI, simply double click or otherwise execute `DepublicatorGui.jar`
