@@ -69,28 +69,23 @@ The decompression of a file is made possible by utilizing the .anchor file, and 
 
 ### Work Breakdown:
 
-Conrad Liu: Worked alongside Peter Jang in implementing compression/decompression metadata features, and expanded on the CLI to implement additional commands. Wrote README.md file and INSTALL.txt file.
-Esen Harris: Worked on the development of the compression algorithm and the decompression algorithms. Organized the algorithm that used the LCS to compress the file by deleting the lcs from the file. Then, we would use the reference of the lcs and create meta data for the deduplicator to read off of. Moral Support of the suffix tree. Developed the GUI that implements New Locker, Deduplicator, Delete and Decompress.
-Josh Surette: Built the SuffixTree data structure, and implemented feature to store directories of files as a single entity.
-Khai Phan: Implemented SuffixTree data structure traversal. Also helped with general design scheme for most additional features.
-Peter Jang: Worked alongside Conrad Liu to implement compression/decompression metadata features and CLI command processing, and helped implement memory management techniques to handle large files.
-
-1) Suffix tree compression
-2) Decompression
-3) Metadata
+-   Conrad Liu: Worked alongside Peter Jang in implementing compression/decompression metadata features, and expanded on the CLI to implement additional commands. Wrote README.md file and INSTALL.txt file.
+-   Esen Harris: Worked on the development of the compression algorithm and the decompression algorithms. Organized the algorithm that used the LCS to compress the file by deleting the lcs from the file. Then, we would use the reference of the lcs and create meta data for the deduplicator to read off of. Moral Support of the suffix tree. Developed the GUI that implements New Locker, Deduplicator, Delete and Decompress.
+-   Josh Surette: Built the SuffixTree data structure, and implemented feature to store directories of files as a single entity.
+-   Khai Phan: Implemented SuffixTree data structure traversal. Also helped with general design scheme for most additional features.
+-   Peter Jang: Worked alongside Conrad Liu to implement compression/decompression metadata features and CLI command processing, and helped implement memory management techniques to handle large files.
 
 
 ### GUI IMPLEMENTATION
--The Lockers Will Be Stored where the Project Folder Lies
-PUSH BUTTONS:
-            NEW or SET Locker
-                - Creates a Locker or Sets your root locker to a locker that already exists
-            Deduplicate
-                - Runs the compression Algorithm using the LCS and stores your selected files
-                  into the locker that you set as the root.
-            Delete
-                - Delete Files within your Locker.
-                   - Select the '.dedup' of the file that you would like to delete
-            Decompress
-                - Go to the locker that contains the files that you would like to decompress
-                    - select any files that you would like to decompress
+-   The Lockers Will Be Stored where the Project Folder Lies
+-   PUSH BUTTONS:
+    -   NEW or SET Locker
+        - Creates a Locker or Sets your root locker to a locker that already exists
+    -   Deduplicate
+        - Runs the compression Algorithm using the LCS and stores your selected filesinto the locker that you set as the root.
+    -   Delete
+        - Delete Files within your Locker.
+        - Select the '.dedup' of the file that you would like to delete
+    -   Decompress
+        - Go to the locker that contains the files that you would like to decompress
+        - Select any files that you would like to decompress

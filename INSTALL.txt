@@ -6,6 +6,12 @@ Operating system: macOS Sierra and Java 8
 
 #### Supporting Files:
 
+Example usage:
+
+1) java -jar Compressor.jar -addFile file1_test.txt -locker MYLOCKER
+2) java -jar Compressor.jar -addFile file3_test.txt -locker MYLOCKER
+3) java -jar Compressor.jar -getStats MYLOCKER
+
 #### Execution:
 
 The repository contains a jar file `Compressor.jar`
