@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.*;
@@ -29,15 +28,8 @@ public class Compressor{
         compress(referenceFile, fileToCompress);
     }
 
-    private void callCompress() {
-        String file2 = "";
-        for (int i = 0; i < 3; i++) {
-            file2 = compressed;
-            compress(referenceFile, file2);
-        }
-    }
-
     private String compress(String file1, String file2){
+        uneditedFile = file2;
 
         ArrayList<Integer> subIndex = new ArrayList<Integer>();
 
@@ -172,7 +164,6 @@ public class Compressor{
         while (LCSuff[row][col] != 0) {
             resultStr  = X.charAt(row - 1) + resultStr; // or Y[col-1]
             --len;
-
             // move diagonally up to previous cell
             row--;
             col--;
