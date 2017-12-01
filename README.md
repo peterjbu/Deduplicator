@@ -23,6 +23,8 @@ The command line serves as the entry point for the program. A user can enter spe
 
 #### Suffix Tree Compression:
 
+
+
 #### Compression Metadata:
 
 There are two sources of metadata that allow a locker to function properly:
@@ -54,3 +56,19 @@ helloworld.txt.dedup: 12
 1) Suffix tree compression
 2) Decompression
 3) Metadata
+
+
+### GUI IMPLEMENTATION
+-The Lockers Will Be Stored where the Project Folder Lies
+PUSH BUTTONS:
+            NEW or SET Locker
+                - Creates a Locker or Sets your root locker to a locker that already exists
+            Deduplicate
+                - Runs the compression Algorithm using the LCS and stores your selected files
+                  into the locker that you set as the root.
+            Delete
+                - Delete Files within your Locker.
+                   - Select the '.dedup' of the file that you would like to delete
+            Decompress
+                - Go to the locker that contains the files that you would like to decompress
+                    - select any files that you would like to decompress
