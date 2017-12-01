@@ -13,7 +13,7 @@ The program is also capable of deleting specific files, can compress and retriev
 
 The command line serves as the entry point for the program. A user can enter specific flags to either store and retrieve compressed files, and initialize/create lockers. These flags are:
 
-`-addFile`: This must be used alongside the -locker flag, and will add a compressed file to the locker of interest.
+`-addFile`: This must be used alongside the `-locker` flag, and will add a compressed file to the locker of interest.
 
 `-locker`: If the locker location does not yet exist, a new locker will be created an initialized. Can be used standalone or with `-addFile`
 
@@ -67,6 +67,13 @@ The decompression of a file is made possible by utilizing the .anchor file, and 
         -   Extract line info in the form `filenameIndex[anchorStartIndex, anchorEndIndex],`
         -   Insert substring in .anchor from `anchorStartIndex` to `anchorEndIndex` to index `filenameIndex` of the compressed file
 
+### Work Breakdown:
+
+Conrad Liu: Worked alongside Peter Jang in implementing compression/decompression metadata features, and expanded on the CLI to implement additional commands. Wrote README.md file and INSTALL.txt file.
+Esen Harris: Worked on the development of the compression algorithm and the decompression algorithms. Organized the algorithm that used the LCS to compress the file by deleting the lcs from the file. Then, we would use the reference of the lcs and create meta data for the deduplicator to read off of. Moral Support of the suffix tree. Developed the GUI that implements New Locker, Deduplicator, Delete and Decompress.
+Josh Surette: Built the SuffixTree data structure, and implemented feature to store directories of files as a single entity.
+Khai Phan: Implemented SuffixTree data structure traversal. Also helped with general design scheme for most additional features.
+Peter Jang: Worked alongside Conrad Liu to implement compression/decompression metadata features and CLI command processing, and helped implement memory management techniques to handle large files.
 
 1) Suffix tree compression
 2) Decompression

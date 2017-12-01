@@ -1,0 +1,12 @@
+### INSTALL INSTRUCTIONS
+
+#### Pre-conditions:
+
+Operating system: macOS Sierra and Java 8
+
+#### Supporting Files:
+
+#### Execution:
+
+The repository contains a jar file `Compressor.jar`
+This file should be run with using `java -jar Compressor.jar <args>`. The <args> supplied will be dependent on the functionality to be used.
