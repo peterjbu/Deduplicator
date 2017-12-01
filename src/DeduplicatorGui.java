@@ -11,6 +11,7 @@ import java.beans.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Random;
 
 
 public class DeduplicatorGui extends JPanel implements ActionListener, PropertyChangeListener {
@@ -39,6 +40,8 @@ class Task extends SwingWorker<Void, Void> {
             referenceFile =  fileNames[0];
             String ref = referenceFile.getName();
             try {
+                int progress = 0;
+                setProgress(0);
                 String referenceContent = new String(Files.readAllBytes(Paths.get(ref)));
                 for (int ii = 1; ii<fileNames.length; ii++){
                     File current =fileNames[ii];
@@ -55,20 +58,6 @@ class Task extends SwingWorker<Void, Void> {
             catch (IOException ex){
                 System.out.println("IO exception");
             }
-
-//            int progress = 0;
-//            //Initialize progress property.
-//            setProgress(0);
-//            while (progress < 100) {
-//                //Sleep for up to one second.
-//                try {
-//                    Thread.sleep(random.nextInt(100));
-//                } catch (InterruptedException ignore) {}
-//                //Make random progress.
-//                progress += random.nextInt(10);
-//                setProgress(Math.min(progress, 100));
-//            }
-
             start = 0;
         }
         else if (delete == 1){
@@ -76,26 +65,32 @@ class Task extends SwingWorker<Void, Void> {
             //You can hide the file if you start it off with a . ex =  .filename.txt
             //if it is the first file, then hide it, otherwise delete
 
-
                 //add a variable to compressor that has the max number for each file and just use this
                 delete = 0;
         }
         else if(decompress == 1){
             String reference = "";
             String test = "";
-            referenceFile =  fileNames[0];
-            String ref = referenceFile.getName();
-
-            try {
-                reference = new String(Files.readAllBytes(Paths.get("file1_test.txt")), StandardCharsets.UTF_8);
-                test = new String(Files.readAllBytes(Paths.get("file2_test.txt")), StandardCharsets.UTF_8);
-            }
-            catch (IOException e){
-                System.out.println("IO exception");
+            File path = fileNames[0].getParentFile();
+            for (final File fileEntry : path.listFiles()) {
+                if (fileEntry.getName().contains(".anchor")) {
+                    reference = fileEntry.getName();
+                } else {
+                    System.out.println("No Anchor File");
+                }
             }
 
-            Decompressor D = new Decompressor(reference, test);
-            System.out.println(D.getDecompressed());
+            for (int i = 0; i<fileNames.length; i++) {
+                try {
+                    reference = new String(Files.readAllBytes(Paths.get(reference)), StandardCharsets.UTF_8);
+                    test = new String(Files.readAllBytes(Paths.get(fileNames[i].getName())), StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    System.out.println("IO exception");
+                }
+                Decompressor D = new Decompressor(reference, test,fileNames[i].getName().replace(".txt",".meta"));
+            }
+
+            //System.out.println(D.getDecompressed());
             decompress = 0;
         }
         return null;
@@ -125,6 +120,10 @@ class Task extends SwingWorker<Void, Void> {
                 taskOutput.append("Files Deleted!! \n");
             }
             delete =0;
+        }
+        else if (decompress ==1){
+            taskOutput.append("Decompressed Files! \n");
+            decompress = 0;
         }
         taskOutput.append("Done!\n");
     }
@@ -160,7 +159,7 @@ class Task extends SwingWorker<Void, Void> {
         taskOutput.setEditable(false);
 
         JPanel panel = new JPanel();
-        panel.add(openButton);
+        //panel.add(openButton);
         panel.add(startButton);
         panel.add(deleteButton);
         panel.add(decompressButton);
@@ -178,35 +177,35 @@ class Task extends SwingWorker<Void, Void> {
     public void actionPerformed(ActionEvent evt) {
         startButton.setEnabled(false);
         if (evt.getSource() == startButton){
+            int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File[] files = fc.getSelectedFiles();
+                fileNames = files;
+                //This is where a real application would open the file
+            }
             start = 1;
-            System.out.println("start");
         }
 
-        if (evt.getSource() == deleteButton){
-            delete = 1;
+        else if (evt.getSource() == deleteButton){
             int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
-
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File[] files = fc.getSelectedFiles();
                 deletefileNames = files;
                 //This is where a real application would open the file
             }
-            System.out.println("delete");
+            delete = 1;
         }
 
-        if(evt.getSource() == decompressButton){
+        else if(evt.getSource() == decompressButton) {
+            int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File[] files = fc.getSelectedFiles();
+                deletefileNames = files;
+                //This is where a real application would open the file
+            }
             decompress = 1;
         }
 
-        if (evt.getSource() == openButton) {
-            int returnVal = fc.showOpenDialog(DeduplicatorGui.this);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-               File[] files = fc.getSelectedFiles();
-               fileNames = files;
-                //This is where a real application would open the file
-            }
-        }
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         //Instances of javax.swing.SwingWorker are not reusuable, so
         //we create new instances as needed.
