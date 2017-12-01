@@ -113,7 +113,7 @@ public class Deduplicator {
             fileContents =  new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
         }
         catch (IOException e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return fileContents;
     }
@@ -172,11 +172,13 @@ public class Deduplicator {
         }
     }
 
+
     /**
      * retrieves compressed file from locker and saves decompressed version to destination
      * @param filePath: Source of target compressed file
      * @param dest: Destination path of decompressed file
      */
+
     public static void retrieve(String filePath, String dest) {
         String lockerPath = filePath.substring(0, filePath.lastIndexOf('/'));
         String fileName = filePath.substring(filePath.lastIndexOf('/'));
