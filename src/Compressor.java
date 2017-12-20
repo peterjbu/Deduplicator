@@ -5,68 +5,89 @@ import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.io.*;
+import java.util.Collections;
 import java.util.regex.Pattern;
 import java.util.zip.*;
 
 public class Compressor{
-    private ArrayList<ArrayList<Integer>> indexes;//indexes of where the most common substring is
+    private ArrayList<Integer> indexes;//indexes of where the most common substring is
     private ArrayList<ArrayList<Integer>> lcsList;
     private String compressed;//result string of the compressed file without the longest common substring
     private String uneditedFile;
     private String referenceFile;
     private String fileToCompress;
     private String meta;
+    private int referenceSegmentSize;
     private int count = 0;
 
     //constructor for LCScompression
     Compressor(String reference, String file2){
-        this.indexes = new ArrayList<ArrayList<Integer>>();
+        this.indexes = new ArrayList<Integer>();
         this.lcsList = new ArrayList<ArrayList<Integer>>();
         this.compressed = "";
-        this.uneditedFile = "";
         referenceFile = reference;
         fileToCompress = file2;
         uneditedFile = file2;
         meta = "";
-//        callCompress();
-        compress(referenceFile, fileToCompress);
+        referenceSegmentSize = referenceFile.length()/10;
+        compressSegments();
     }
 
-    private String compress(String file1, String file2){
-        uneditedFile = file2;
+    private void compressSegments() {
+        for (int i = 0; i < 10; i++) {
+            System.out.println(i);
+            compress(referenceFile, uneditedFile, i*referenceSegmentSize, i*referenceSegmentSize + referenceSegmentSize, i);
+        }
+        for (int i = 0; i < indexes.size(); i++) {
+            fileToCompress = fileToCompress.substring(0, indexes.get(i)) + fileToCompress.substring(lcsList.get(i).get(1));
+        }
+    }
+
+    private String compress(String file1, String file2, int start, int end, int iteration){
+
+        boolean file2End = false;
 
         ArrayList<Integer> subIndex = new ArrayList<Integer>();
 
+        String referenceSegment = referenceFile.substring(start, end);
+        String file2Segment = "";
+        if (iteration == 9) {
+            file2End = true;
+            file2Segment = file2.substring(start);
+        }
+        else {
+            file2Segment = file2.substring(start, end);
+
+        }
+
         //concatenate two files and build suffix tree to
         //find longest common substring of file1 and file2; hardcoded in for now.
-        SuffixTree tree = new SuffixTree(file1, file2);
+        SuffixTree tree = new SuffixTree(referenceSegment, file2Segment);
         String currentLcs = tree.getLCS();
 
-        int startingIndex = file1.indexOf(currentLcs);
+
+
+        int startingIndex = file1.indexOf(currentLcs, start);
+//        System.out.println("startingIndex = " + startingIndex);
         int endingIndex = startingIndex + currentLcs.length();
 
         subIndex.add(startingIndex);
         subIndex.add(endingIndex);
 
-        lcsList.add(subIndex);
+        lcsList.add(0, subIndex);
 
-        ArrayList<Integer> temp = new ArrayList<Integer>();
+        int index = file2.indexOf(currentLcs, start);//index of the longest common substring
+//        file2 = file2.replaceFirst(Pattern.quote(currentLcs), "");//replace first lcsList in the string with "" empty string
 
-        int index = file2.indexOf(currentLcs);//index of the longest common substring
-        temp.add(index);//add lcsList index into the list of indexes
-        file2 = file2.replaceFirst(Pattern.quote(currentLcs), "");//replace first lcsList in the string with "" empty string
+        indexes.add(0, index);
 
-        indexes.add(temp);
-
-        System.out.println("Ending replacements");
-
-        if (count < 3) {
-            count++;
-            tree.killTree();
-            tree = null;
-            System.gc();
-            compress(file1, file2);
-        }
+//        if (count < 3) {
+//            count++;
+//            tree.killTree();
+//            tree = null;
+//            System.gc();
+//            compress(file1, file2);
+//        }
         /** the data required to reconstruct the file based off of the reference file is appended to the
          compressed txt, making the program volatile.The structure of the compressed file will be:
 
@@ -74,26 +95,26 @@ public class Compressor{
          index [starting index and ending index of reference file substring
 
          **/
-        else {
+//        else {
+        if (file2End) {
             for (int i = 0; i < indexes.size(); i++) {
-                for (int j = 0; j < indexes.get(i).size(); j++) {
-                    meta += indexes.get(i).get(j);
-                    meta += ":";
-                    meta += lcsList.get(i);
-                    meta += ",";
-                }
+                meta += indexes.get(i);
+                meta += ":";
+                meta += lcsList.get(i);
+                meta += ",";
                 if (i != indexes.size() - 1) {
                     meta += "\n";
                 }
             }
             this.compressed = file2;
         }
+//        }
 
         return this.compressed;
     }
 
     public String getCompressed(){
-        return compressed;
+        return fileToCompress;
     }
 
     public String getMeta() {
@@ -202,7 +223,7 @@ public class Compressor{
         catch (IOException i) {
             System.out.println("ERROR");
         }
-        
+
     }
 
     public static void addFolderToDirectory(ZipOutputStream zip, File folderPath, String filename) {
@@ -248,14 +269,14 @@ public class Compressor{
         Compressor L12 = new Compressor(file1_test, file2_test);
 
 
-        String result = L12.compress(file1_test, file2_test);
-        System.out.println(result);
+//        String result = L12.compress(file1_test, file2_test);
+//        System.out.println(result);
 
         File file = new File("file2_test.txt");
         // creates the file
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("file2_test.txt"), "utf-8")))
         {
-            writer.write(result);
+//            writer.write(result);
         }
         catch (IOException e){
             System.out.println("IO exception.");
